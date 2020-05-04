@@ -1,0 +1,6 @@
+[submodule "external/allolib"]
+	path = external/allolib
+	url = https://github.com/AlloSphere-Research-Group/allolib.git
+[submodule "tinc-python"]
+	path = tinc-python
+	url = https://github.com/AlloSphere-Research-Group/tinc-python.git
