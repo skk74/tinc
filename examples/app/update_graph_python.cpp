@@ -2,9 +2,10 @@
 #include "al/graphics/al_Image.hpp"
 #include "al/ui/al_ControlGUI.hpp"
 
-#include "al_ext/tinc/al_DiskBuffer.hpp"
+#include "tinc/ImageDiskBuffer.hpp"
 
 using namespace al;
+using namespace tinc;
 
 struct TincApp : DistributedApp {
 

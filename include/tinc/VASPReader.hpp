@@ -1,5 +1,5 @@
-#ifndef AL_VASPREADER
-#define AL_VASPREADER
+#ifndef VASPREADER_HPP
+#define VASPREADER_HPP
 
 #include <map>
 #include <mutex>
@@ -9,15 +9,15 @@
 #include "al/math/al_Mat.hpp"
 #include "al/math/al_Vec.hpp"
 
-namespace al {
+namespace tinc {
 
 class VASPReader {
- public:
+public:
   typedef enum {
-    USE_INLINE_ELEMENT_NAMES,   // Set positions using inline names (the name
-                                // accompanying the position is used instead of
-                                // following the species declaration line)
-    DONT_VALIDATE_INLINE_NAMES  //
+    USE_INLINE_ELEMENT_NAMES,  // Set positions using inline names (the name
+                               // accompanying the position is used instead of
+                               // following the species declaration line)
+    DONT_VALIDATE_INLINE_NAMES //
   } VASPOption;
 
   typedef enum {
@@ -39,8 +39,8 @@ class VASPReader {
 
   bool loadFile(std::string fileName);
 
-  std::map<std::string, std::vector<float>> &getAllPositions(
-      bool transform = true);
+  std::map<std::string, std::vector<float>> &
+  getAllPositions(bool transform = true);
 
   bool hasElement(std::string elementType);
 
@@ -56,7 +56,7 @@ class VASPReader {
   al::Vec3d getNormalizingVector();
   al::Vec3d getCenteringVector();
 
- private:
+private:
   std::string mBasePath;
   std::string mFileName;
   bool mVerbose{true};
@@ -70,6 +70,6 @@ class VASPReader {
   std::vector<VASPOption> mOptions;
 };
 
-}  // namespace al
+} // namespace tinc
 
-#endif  // AL_VASPREADER
+#endif // VASPREADER_HPP

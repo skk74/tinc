@@ -1,5 +1,5 @@
-#ifndef AL_DEFERREDCOMPUTATION_HPP
-#define AL_DEFERREDCOMPUTATION_HPP
+#ifndef DEFERREDCOMPUTATION_HPP
+#define DEFERREDCOMPUTATION_HPP
 
 #include <condition_variable>
 #include <iostream>
@@ -8,10 +8,10 @@
 #include <thread>
 #include <vector>
 
-#include "al_ext/tinc/al_BufferManager.hpp"
+#include "tinc/BufferManager.hpp"
 // -----------------------------------------
 
-namespace al {
+namespace tinc {
 
 template <class DataType>
 class DeferredComputation : public BufferManager<DataType> {
@@ -127,6 +127,6 @@ private:
   std::mutex mProcessLock;
 };
 
-} // namespace al
+} // namespace tinc
 
-#endif // AL_DEFERREDCOMPUTATION_HPP
+#endif // DEFERREDCOMPUTATION_HPP

@@ -1,7 +1,6 @@
-
-
 #ifndef AL_VASPRENDER
 #define AL_VASPRENDER
+
 #include "al/graphics/al_Graphics.hpp"
 
 #undef CIEXYZ
@@ -39,8 +38,8 @@ struct InstancingMesh {
             GLuint attrib_loc, GLint attrib_num_elems, GLenum attrib_type) {
     shader.compile(vert_str, frag_str);
     buffer.bufferType(GL_ARRAY_BUFFER);
-    buffer.usage(GL_DYNAMIC_DRAW);  // assumes buffer will change every frame
-                                    // and will be used for drawing
+    buffer.usage(GL_DYNAMIC_DRAW); // assumes buffer will change every frame
+                                   // and will be used for drawing
     buffer.create();
 
     auto &v = mesh.vao();
@@ -48,12 +47,12 @@ struct InstancingMesh {
     v.enableAttrib(attrib_loc);
     // for normalizing, this code only considers GL_FLOAT AND GL_UNSIGNED_BYTE,
     // (does not normalize floats and normalizes unsigned bytes)
-    v.attribPointer(
-        attrib_loc, buffer, attrib_num_elems, attrib_type,
-        (attrib_type == GL_FLOAT) ? GL_FALSE : GL_TRUE,  // normalize?
-        0,                                               // stride
-        0);                                              // offset
-    glVertexAttribDivisor(attrib_loc, 1);  // step attribute once per instance
+    v.attribPointer(attrib_loc, buffer, attrib_num_elems, attrib_type,
+                    (attrib_type == GL_FLOAT) ? GL_FALSE
+                                              : GL_TRUE, // normalize?
+                    0,                                   // stride
+                    0);                                  // offset
+    glVertexAttribDivisor(attrib_loc, 1); // step attribute once per instance
   }
 
   // size: size (in bytes) of whole data. if data is 10 vec4,
@@ -91,7 +90,7 @@ typedef struct {
 } AtomData;
 
 class VASPRender {
- public:
+public:
   std::vector<AtomData> mAtomData;
   BoundingBoxData dataBoundary;
 
@@ -115,15 +114,15 @@ class VASPRender {
 
   ShaderProgram instancing_shader;
   InstancingMesh instancing_mesh0;
-  float mMarkerScale;  // Global marker scaling factor
+  float mMarkerScale; // Global marker scaling factor
 
   void init() {
     addSphere(instancing_mesh0.mesh, 1, 12, 6);
     instancing_mesh0.mesh.update();
     instancing_mesh0.init(instancing_vert, instancing_frag,
-                          1,          // location
-                          4,          // num elements
-                          GL_FLOAT);  // type
+                          1,         // location
+                          4,         // num elements
+                          GL_FLOAT); // type
 
     instancing_shader.compile(instancing_vert, instancing_frag);
 
@@ -370,6 +369,6 @@ gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * p;
                                )";
 };
 
-}  // namespace al
+} // namespace al
 
 #endif AL_VASPRENDER

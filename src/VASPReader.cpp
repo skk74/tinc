@@ -14,6 +14,7 @@
 #include <Windows.h>
 #endif
 
+using namespace tinc;
 using namespace al;
 
 bool VASPReader::loadFile(std::string fileName) {

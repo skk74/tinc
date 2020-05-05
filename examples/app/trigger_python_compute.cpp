@@ -1,9 +1,10 @@
 #include "al/app/al_DistributedApp.hpp"
 #include "al/ui/al_ControlGUI.hpp"
 
-#include "al_ext/tinc/al_DiskBuffer.hpp"
+#include "tinc/JsonDiskBuffer.hpp"
 
 using namespace al;
+using namespace tinc;
 
 struct TincApp : DistributedApp {
 

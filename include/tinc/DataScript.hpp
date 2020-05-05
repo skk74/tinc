@@ -1,6 +1,5 @@
-
-#ifndef INCLUDE_AL_DATASCRIPT
-#define INCLUDE_AL_DATASCRIPT
+#ifndef DATASCRIPT_HPP
+#define DATASCRIPT_HPP
 
 #include <condition_variable>
 #include <mutex>
@@ -13,14 +12,14 @@
 #include "al/ui/al_ParameterServer.hpp"
 #include "nlohmann/json.hpp"
 
-namespace al {
+namespace tinc {
 
 enum FlagType {
   FLAG_GENERIC = 0,
-  FLAG_SCRIPT,  // The script to be run
+  FLAG_SCRIPT, // The script to be run
   FLAG_INPUT_DIR,
-  FLAG_INPUT_NAME,  // Should be relative to input dir. If file has changed,
-                    // this forces recompute
+  FLAG_INPUT_NAME, // Should be relative to input dir. If file has changed,
+                   // this forces recompute
   FLAG_OUTPUT_DIR,
   FLAG_OUTPUT_NAME
 };
@@ -31,28 +30,28 @@ struct Flag {
 };
 
 class PushDirectory {
- public:
+public:
   PushDirectory(std::string directory, bool verbose = false);
 
   ~PushDirectory();
 
- private:
+private:
   char previousDirectory[512];
   bool mVerbose;
 
-  static std::mutex mDirectoryLock;  // Protects all instances of PushDirectory
+  static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
 };
 
 class Processor {
- public:
+public:
   /**
    * @brief Set the directory for output files
    */
   void setOutputDirectory(std::string outputDirectory) {
-    mOutputDirectory = File::conformPathToOS(outputDirectory);
+    mOutputDirectory = al::File::conformPathToOS(outputDirectory);
     std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');
-    if (!File::isDirectory(mOutputDirectory)) {
-      if (!Dir::make(mOutputDirectory)) {
+    if (!al::File::isDirectory(mOutputDirectory)) {
+      if (!al::Dir::make(mOutputDirectory)) {
         std::cout << "Unable to create cache directory:" << mOutputDirectory
                   << std::endl;
       }
@@ -63,10 +62,10 @@ class Processor {
    * @brief Set the current directory for process to run in.
    */
   void setRunningDirectory(std::string directory) {
-    mRunningDirectory = File::conformPathToOS(directory);
+    mRunningDirectory = al::File::conformPathToOS(directory);
     std::replace(mRunningDirectory.begin(), mRunningDirectory.end(), '\\', '/');
-    if (!File::exists(mRunningDirectory)) {
-      if (!Dir::make(mRunningDirectory)) {
+    if (!al::File::exists(mRunningDirectory)) {
+      if (!al::Dir::make(mRunningDirectory)) {
         std::cout << "Error creating directory: " << mRunningDirectory
                   << std::endl;
       }
@@ -80,14 +79,14 @@ class Processor {
   void setOutputFileNames(std::vector<std::string> outputFiles) {
     mOutputFileNames.clear();
     for (auto fileName : outputFiles) {
-      auto name = File::conformPathToOS(fileName);
+      auto name = al::File::conformPathToOS(fileName);
       std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');
       // FIXME this is not being used everywhere it should be....
       mOutputFileNames.push_back(name);
     }
   }
 
- protected:
+protected:
   std::string mRunningDirectory;
   std::string mOutputDirectory{"cached_output/"};
   std::vector<std::string> mOutputFileNames;
@@ -151,7 +150,7 @@ class Processor {
  * This provides the greatest flexibility and extensibility.
  */
 class DataScript : public Processor {
- public:
+public:
   DataScript(std::string outputDirectory = "cached_output/") {
     setOutputDirectory(outputDirectory);
   }
@@ -247,21 +246,21 @@ class DataScript : public Processor {
 
   std::string runningDirectory() { return mRunningDirectory; }
 
-  DataScript &registerParameter(Parameter &param) {
+  DataScript &registerParameter(al::Parameter &param) {
     mParameters.push_back(&param);
     return *this;
   }
 
-  DataScript &operator<<(Parameter &newParam) {
+  DataScript &operator<<(al::Parameter &newParam) {
     return registerParameter(newParam);
   }
 
-  DataScript &registerParameterServer(ParameterServer &server) {
+  DataScript &registerParameterServer(al::ParameterServer &server) {
     mParamServer = &server;
     return *this;
   }
 
-  DataScript &operator<<(ParameterServer &server) {
+  DataScript &operator<<(al::ParameterServer &server) {
     return registerParameterServer(server);
   }
 
@@ -270,13 +269,13 @@ class DataScript : public Processor {
     return *this;
   }
 
- protected:
+protected:
   // These need to be accessible by the subclass
   std::vector<Flag> mFlags;
-  std::vector<Parameter *> mParameters;
-  ParameterServer *mParamServer;
+  std::vector<al::Parameter *> mParameters;
+  al::ParameterServer *mParamServer;
 
- private:
+private:
   std::string mScriptCommand{"/usr/bin/python3"};
   std::string mScriptName;
 
@@ -305,7 +304,7 @@ class DataScript : public Processor {
 };
 
 class CacheManager {
- public:
+public:
   void registerProcessor(Processor &processor) {
     mProcessors.push_back(&processor);
   }
@@ -327,12 +326,12 @@ class CacheManager {
     // TODO implement clear cache
   }
 
- private:
+private:
   std::vector<Processor *> mProcessors;
 };
 
 class ParallelProcessor : public DataScript {
- public:
+public:
   // TODO is this worth finishing?
 
   void processSpace(const std::vector<std::vector<std::string>> &allVecs,
@@ -378,16 +377,16 @@ class ParallelProcessor : public DataScript {
 
   void stop() {}
 
- private:
+private:
   std::shared_ptr<std::thread> mParallelProcess;
   std::atomic<bool> mRunning;
 };
 
-}  // namespace al
+} // namespace tinc
 
 #ifdef AL_WINDOWS
 #undef popen
 #undef pclose
 #endif
 
-#endif  // INCLUDE_AL_DATASCRIPT
+#endif // DATASCRIPT_HPP

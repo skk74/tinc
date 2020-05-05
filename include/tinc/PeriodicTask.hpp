@@ -1,11 +1,17 @@
-#ifndef AL_PERIODICTASK_HPP
-#define AL_PERIODICTASK_HPP
+#ifndef PERIODICTASK_HPP
+#define PERIODICTASK_HPP
 
-using namespace std;
+#include <atomic>
+#include <chrono>
+#include <functional>
+#include <thread>
+
+using namespace std::chrono_literals;
+
+namespace tinc {
 
 class PeriodicTask {
 public:
-
   ~PeriodicTask() { stop(); }
 
   bool start(std::function<bool()> func) {
@@ -13,11 +19,11 @@ public:
       return false;
     }
     mRunning = true;
-    mFuncThread = std::make_shared<std::thread>(threadFunction,func, this);
+    mFuncThread = std::make_shared<std::thread>(threadFunction, func, this);
     return mFuncThread != nullptr;
   }
 
-  bool running() { return  mRunning || mFuncThread != nullptr; }
+  bool running() { return mRunning || mFuncThread != nullptr; }
 
   void stop() {
     if (mFuncThread) {
@@ -30,20 +36,20 @@ public:
   std::chrono::nanoseconds waitTime() const;
   void setWaitTime(std::chrono::nanoseconds waitTime);
 
-//  std::chrono::nanoseconds granularity() const
-//  {
-//    return mGranularity;
-//  }
-//  void setGranularity(std::chrono::nanoseconds granularity)
-//  {
-//    mGranularity = granularity;
-//  }
+  //  std::chrono::nanoseconds granularity() const
+  //  {
+  //    return mGranularity;
+  //  }
+  //  void setGranularity(std::chrono::nanoseconds granularity)
+  //  {
+  //    mGranularity = granularity;
+  //  }
 
 private:
-
-  static void threadFunction(std::function<bool()> func, PeriodicTask *thisPtr) {
+  static void threadFunction(std::function<bool()> func,
+                             PeriodicTask *thisPtr) {
     auto waitTime = thisPtr->waitTime();
-    while(thisPtr->mRunning) {
+    while (thisPtr->mRunning) {
       if (!func()) {
         thisPtr->mRunning = false;
         break;
@@ -52,22 +58,19 @@ private:
     }
   }
 
-  std::chrono::nanoseconds mWaitTime {10000ns};
-  std::chrono::nanoseconds mGranularity {10000ns}; // Fixme implement granularity for snappier shutdown of waiting
+  std::chrono::nanoseconds mWaitTime{10000ns};
+  // Fixme implement granularity for snappier shutdown of waiting
+  std::chrono::nanoseconds mGranularity{10000ns};
   std::atomic<bool> mRunning;
   std::shared_ptr<std::thread> mFuncThread;
-
 };
 
+std::chrono::nanoseconds PeriodicTask::waitTime() const { return mWaitTime; }
 
-std::chrono::nanoseconds PeriodicTask::waitTime() const
-{
-  return mWaitTime;
-}
-
-void PeriodicTask::setWaitTime(std::chrono::nanoseconds waitTime)
-{
+void PeriodicTask::setWaitTime(std::chrono::nanoseconds waitTime) {
   mWaitTime = waitTime;
 }
 
-#endif // AL_PERIODICTASK_HPP
+} // namespace tinc
+
+#endif // PERIODICTASK_HPP

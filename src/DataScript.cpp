@@ -27,7 +27,7 @@
 #include <fileapi.h>
 #endif
 
-using namespace al;
+using namespace tinc;
 
 constexpr auto DATASCRIPT_META_FORMAT_VERSION = 0;
 
@@ -336,7 +336,7 @@ bool DataScript::waitForAsyncDone() {
   return ok;
 }
 
-void DataScript::appendFlag(std::string flagText, al::FlagType type) {
+void DataScript::appendFlag(std::string flagText, FlagType type) {
   if (type == FLAG_OUTPUT_DIR) {
     setOutputDirectory(flagText);
   } else if (type == FLAG_OUTPUT_NAME) {
@@ -471,7 +471,7 @@ bool DataScript::needsRecompute() {
     }
   }
   metaFileStream.close();
-  if (!File::exists(outputFile())) {
+  if (!al::File::exists(outputFile())) {
     return true;
   }
   return false;
@@ -494,6 +494,7 @@ std::string DataScript::metaFilename() {
   if (outPath == "") {
     outPath = outputDirectory();
   }
-  std::string metafilename = File::conformPathToOS(outPath) + outName + ".meta";
+  std::string metafilename =
+      al::File::conformPathToOS(outPath) + outName + ".meta";
   return metafilename;
 }

@@ -14,6 +14,8 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/DataScript.hpp
     ${TINC_INCLUDE_PATH}/tinc/BufferManager.hpp
     ${TINC_INCLUDE_PATH}/tinc/DiskBuffer.hpp
+    ${TINC_INCLUDE_PATH}/tinc/ImageDiskBuffer.hpp
+    ${TINC_INCLUDE_PATH}/tinc/JsonDiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/DeferredComputation.hpp
     ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPReader.hpp
