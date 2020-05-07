@@ -371,4 +371,4 @@ gl_Position = al_ProjectionMatrix * al_ModelViewMatrix * p;
 
 } // namespace al
 
-#endif AL_VASPRENDER
+#endif // AL_VASPRENDER

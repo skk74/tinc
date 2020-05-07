@@ -4,3 +4,6 @@
 [submodule "tinc-python"]
 	path = tinc-python
 	url = https://github.com/AlloSphere-Research-Group/tinc-python.git
+[submodule "external/al_ext"]
+	path = external/al_ext
+	url = https://github.com/AlloSphere-Research-Group/al_ext
