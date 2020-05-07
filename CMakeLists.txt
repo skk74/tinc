@@ -5,6 +5,7 @@ project(TINC)
 set(TINC_SRC
 
     ${CMAKE_CURRENT_LIST_DIR}/src/DataScript.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/VASPReader.cpp
   )
 
@@ -17,6 +18,7 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/ImageDiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/JsonDiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/DeferredComputation.hpp
+    ${TINC_INCLUDE_PATH}/tinc/ParameterSpace.hpp
     ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPReader.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPRender.hpp
