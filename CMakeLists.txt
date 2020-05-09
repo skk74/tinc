@@ -4,6 +4,7 @@ project(TINC)
 
 set(TINC_SRC
 
+    ${CMAKE_CURRENT_LIST_DIR}/src/AtomRenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/DataScript.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/VASPReader.cpp
@@ -12,6 +13,7 @@ set(TINC_SRC
 set(TINC_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/include)
 
 set(TINC_HEADERS
+    ${TINC_INCLUDE_PATH}/tinc/AtomRenderer.hpp
     ${TINC_INCLUDE_PATH}/tinc/DataScript.hpp
     ${TINC_INCLUDE_PATH}/tinc/BufferManager.hpp
     ${TINC_INCLUDE_PATH}/tinc/DiskBuffer.hpp
@@ -21,7 +23,6 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpace.hpp
     ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPReader.hpp
-    ${TINC_INCLUDE_PATH}/tinc/VASPRender.hpp
 )
 
 add_library(tinc ${TINC_SRC} ${TINC_HEADERS})
