@@ -1,16 +1,19 @@
 #ifndef DATASCRIPT_HPP
 #define DATASCRIPT_HPP
 
+#include "al/io/al_File.hpp"
+#include "al/ui/al_Parameter.hpp"
+#include "al/ui/al_ParameterServer.hpp"
+
+#include "tinc/Processor.hpp"
+
+#include "nlohmann/json.hpp"
+
 #include <condition_variable>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
-
-#include "al/io/al_File.hpp"
-#include "al/ui/al_Parameter.hpp"
-#include "al/ui/al_ParameterServer.hpp"
-#include "nlohmann/json.hpp"
 
 namespace tinc {
 
@@ -40,56 +43,6 @@ private:
   bool mVerbose;
 
   static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
-};
-
-class Processor {
-public:
-  /**
-   * @brief Set the directory for output files
-   */
-  void setOutputDirectory(std::string outputDirectory) {
-    mOutputDirectory = al::File::conformPathToOS(outputDirectory);
-    std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');
-    if (!al::File::isDirectory(mOutputDirectory)) {
-      if (!al::Dir::make(mOutputDirectory)) {
-        std::cout << "Unable to create cache directory:" << mOutputDirectory
-                  << std::endl;
-      }
-    }
-  }
-
-  /**
-   * @brief Set the current directory for process to run in.
-   */
-  void setRunningDirectory(std::string directory) {
-    mRunningDirectory = al::File::conformPathToOS(directory);
-    std::replace(mRunningDirectory.begin(), mRunningDirectory.end(), '\\', '/');
-    if (!al::File::exists(mRunningDirectory)) {
-      if (!al::Dir::make(mRunningDirectory)) {
-        std::cout << "Error creating directory: " << mRunningDirectory
-                  << std::endl;
-      }
-    }
-  }
-
-  /**
-   * @brief Set the names of output file
-   * @param outputFiles list of output file names.
-   */
-  void setOutputFileNames(std::vector<std::string> outputFiles) {
-    mOutputFileNames.clear();
-    for (auto fileName : outputFiles) {
-      auto name = al::File::conformPathToOS(fileName);
-      std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');
-      // FIXME this is not being used everywhere it should be....
-      mOutputFileNames.push_back(name);
-    }
-  }
-
-protected:
-  std::string mRunningDirectory;
-  std::string mOutputDirectory{"cached_output/"};
-  std::vector<std::string> mOutputFileNames;
 };
 
 /**
@@ -151,6 +104,7 @@ protected:
  */
 class DataScript : public Processor {
 public:
+  // TODO change constructor to match Processor constructor
   DataScript(std::string outputDirectory = "cached_output/") {
     setOutputDirectory(outputDirectory);
   }
@@ -187,7 +141,7 @@ public:
    */
   virtual void configure();
 
-  bool process(bool forceRecompute = false);
+  bool process(bool forceRecompute = false) override;
 
   /**
    * @brief execute script with configuration options provided
