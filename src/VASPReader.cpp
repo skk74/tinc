@@ -201,7 +201,9 @@ bool VASPReader::loadFile(std::string fileName) {
                                             1024);
             mPositions[currentType].resize(mPositions[currentType].size() + 4);
           } else {
-            std::cout << "POSCAR size mismatch." << std::endl;
+            std::cout << "POSCAR size mismatch. Expected "
+                      << mPositions[currentType].size() << " got "
+                      << counter[currentType] * 4 << std::endl;
           }
         } else {
           if (totalCounter >= currentElementCount) {
@@ -214,7 +216,12 @@ bool VASPReader::loadFile(std::string fileName) {
             } else {
               currentTypeIt--;
               currentTypeNumberIt--;
-              std::cerr << "POSCAR size mismatch" << std::endl;
+              std::cerr << "POSCAR size mismatch. Max are "
+                        << std::distance(elementNames.begin(), currentTypeIt)
+                        << ", "
+                        << std::distance(elementCount.begin(),
+                                         currentTypeNumberIt)
+                        << std::endl;
             }
             //                            counter[currentType] = 0;
           }

@@ -35,6 +35,8 @@ public:
   bool process(bool forceRecompute = false) override;
   bool waitUntilDone();
 
+  std::function<void(bool)> doneCallback = nullptr;
+
 protected:
   void startThread();
 

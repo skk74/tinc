@@ -18,18 +18,59 @@
 namespace tinc {
 
 enum FlagType {
-  FLAG_GENERIC = 0,
-  FLAG_SCRIPT, // The script to be run
-  FLAG_INPUT_DIR,
-  FLAG_INPUT_NAME, // Should be relative to input dir. If file has changed,
-                   // this forces recompute
-  FLAG_OUTPUT_DIR,
-  FLAG_OUTPUT_NAME
+  FLAG_INT = 0,
+  FLAG_DOUBLE, // The script to be run
+  FLAG_STRING
 };
 
 struct Flag {
-  std::string flagText;
-  FlagType type{FLAG_GENERIC};
+
+  Flag() {}
+  Flag(std::string value) {
+    type = FLAG_STRING;
+    flagValueStr = value;
+  }
+
+  Flag(int64_t value) {
+    type = FLAG_INT;
+    flagValueInt = value;
+  }
+
+  Flag(double value) {
+    type = FLAG_DOUBLE;
+    flagValueDouble = value;
+  }
+
+  //  ~Flag()
+  //  {
+  //      delete[] cstring;  // deallocate
+  //  }
+
+  //  Flag(const Flag& other) // copy constructor
+  //      : Flag(other.cstring)
+  //  {}
+
+  //  Flag(Flag&& other) noexcept // move constructor
+  //      : cstring(std::exchange(other.cstring, nullptr))
+  //  {}
+
+  //  Flag& operator=(const Flag& other) // copy assignment
+  //  {
+  //      return *this = Flag(other);
+  //  }
+
+  //  Flag& operator=(Flag&& other) noexcept // move assignment
+  //  {
+  //      std::swap(cstring, other.cstring);
+  //      return *this;
+  //  }
+
+  std::string commandFlag; // A prefix to the flag (e.g. -o)
+
+  FlagType type;
+  std::string flagValueStr;
+  int64_t flagValueInt;
+  double flagValueDouble;
 };
 
 class PushDirectory {
@@ -105,9 +146,7 @@ private:
 class DataScript : public Processor {
 public:
   // TODO change constructor to match Processor constructor
-  DataScript(std::string outputDirectory = "cached_output/") {
-    setOutputDirectory(outputDirectory);
-  }
+  DataScript(std::string id = "") : Processor(id) {}
 
   virtual ~DataScript() { waitForAsyncDone(); }
 
@@ -127,42 +166,25 @@ public:
     mScriptName = scriptName;
   }
 
+  /**
+   * @brief Query current script file name
+   */
   std::string scriptFile(bool fullPath = false);
 
+  /**
+   * @brief Query input file name
+   */
   std::string inputFile(bool fullPath = true, int index = 0);
 
+  /**
+   * @brief Query output file name
+   */
   std::string outputFile(bool fullPath = true, int index = 0);
 
   /**
-   * @brief configure internal values prior to run
-   *
-   * Override this function to prepare command line flags.
-   * This function is called internally by process()
+   * @brief process
    */
-  virtual void configure();
-
   bool process(bool forceRecompute = false) override;
-
-  /**
-   * @brief execute script with configuration options provided
-   * @param options
-   * @param forceRecompute
-   * @param outputDir
-   * @param outputName
-   * @param inputDir
-   * @param inputName
-   * @return false if there was any internal error
-   *
-   * Alternate method for processing. This discards any flags that have been
-   * added with appendFlags and will generate a json file from the options
-   * argument whose name is passed to the python script.
-   *
-   * You must call setScriptName() prior to any call of this function.
-   */
-  bool process(std::map<std::string, std::string> options,
-               bool forceRecompute = false, std::string outputDir = "",
-               std::string outputName = "", std::string inputDir = "",
-               std::string inputName = "");
 
   /**
    * @brief Cleans a name up so it can be written to disk
@@ -188,46 +210,32 @@ public:
 
   void maxAsyncProcesses(int num) { mMaxAsyncProcesses = num; }
 
-  void clearFlags() { mFlags.clear(); }
-
-  void appendFlag(std::string flagText, FlagType type = FLAG_GENERIC);
-
   void verbose(bool verbose = true) { mVerbose = true; }
 
   void registerDoneCallback() { throw "Not implemented yet."; }
 
-  std::string outputDirectory() { return mOutputDirectory; }
-
-  std::string runningDirectory() { return mRunningDirectory; }
-
-  DataScript &registerParameter(al::Parameter &param) {
+  DataScript &registerParameter(al::ParameterMeta &param) {
     mParameters.push_back(&param);
     return *this;
   }
 
-  DataScript &operator<<(al::Parameter &newParam) {
+  DataScript &operator<<(al::ParameterMeta &newParam) {
     return registerParameter(newParam);
   }
 
-  DataScript &registerParameterServer(al::ParameterServer &server) {
-    mParamServer = &server;
-    return *this;
-  }
-
-  DataScript &operator<<(al::ParameterServer &server) {
-    return registerParameterServer(server);
-  }
-
-  DataScript &operator<<(std::string flag) {
-    appendFlag(flag);
-    return *this;
-  }
+  /**
+   * @brief Add configuration key value pairs here
+   */
+  std::map<std::string, Flag> configuration;
 
 protected:
   // These need to be accessible by the subclass
-  std::vector<Flag> mFlags;
-  std::vector<al::Parameter *> mParameters;
+  std::vector<al::ParameterMeta *> mParameters;
   al::ParameterServer *mParamServer;
+
+  std::string writeJsonConfig();
+
+  void parametersToConfig(nlohmann::json &j);
 
 private:
   std::string mScriptCommand{"/usr/bin/python3"};
@@ -248,7 +256,7 @@ private:
 
   bool runCommand(const std::string &command);
 
-  void writeMeta();
+  bool writeMeta();
 
   al_sec modified(const char *path) const;
 

@@ -7,12 +7,32 @@
 using namespace al;
 using namespace tinc;
 
+// This example shows how to set up computation chains in C++
+// The chain to be built comprises 4 processes, the last one (4)
+// Must wait for two branches to complete (one with processes 1 and 3,
+// the other with process 2.
+
 //   1    2
 //   |    |
 //   3    |
 //   \   /
 //     |
 //     4
+
+// The computation chains are triggered by changes in the value of the
+// "value" parameter. This value also determines the duration (sleep)
+// of process 2, so for values < 0.5, 2 will complete before 1,
+// for values between 0.5 and 0.75, 2 will complete after 1 but before 3
+// And > 0.75 it will complete after 3.
+// Computation of 2 starts at the same time as 1 (on separate threads)
+// but in all cases computation of 4 only begins once 1,2 and 3 have all
+// completed.
+
+// Notice that "mainChain" is serial and not asynchronous, so the application
+// will block while computing. This is often a desirable behavior, as it avoids
+// queing up time consuming but unwanted computation, but if app responsiveness
+// is important, mainChain can be run within an async process, effectively
+// queing up computation in the background without blocking the gui thread.
 
 struct MyApp : public App {
 

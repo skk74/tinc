@@ -61,6 +61,9 @@ void ProcessorAsync::startThread() {
       } else {
         mRetValue = this->process(mRequestForce);
       }
+      if (doneCallback) {
+        doneCallback(mRetValue);
+      }
       //      std::cout << "completed thread process " << mProcessor->id <<
       //      std::endl;
     }
