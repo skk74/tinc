@@ -18,16 +18,23 @@ public:
 
   ~ProcessorAsync();
 
+  // FIXME we need to take over the other process if we tunr it async.
   ProcessorAsync(const ProcessorAsync &other) // copy constructor
-      : ProcessorAsync(other.mProcessor) {}
+      : ProcessorAsync(other.mProcessor) {
+    id = other.id;
+  }
   ProcessorAsync(ProcessorAsync &&other) noexcept // move constructor
-      : mThread(std::exchange(other.mThread, nullptr)) {}
+      : mThread(std::exchange(other.mThread, nullptr)) {
+    id = other.id;
+  }
   ProcessorAsync &operator=(const ProcessorAsync &other) // copy assignment
   {
     return *this = ProcessorAsync(other);
+    ;
   }
   ProcessorAsync &operator=(ProcessorAsync &&other) noexcept // move assignment
   {
+    id = other.id;
     std::swap(mThread, other.mThread);
     return *this;
   }
@@ -35,7 +42,8 @@ public:
   bool process(bool forceRecompute = false) override;
   bool waitUntilDone();
 
-  std::function<void(bool)> doneCallback = nullptr;
+  Processor *processor() const;
+  void setProcessor(Processor *processor);
 
 protected:
   void startThread();

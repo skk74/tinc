@@ -51,6 +51,10 @@ void Processor::setOutputFileNames(std::vector<std::string> outputFiles) {
   }
 }
 
+std::vector<std::string> Processor::getOutputFileNames() {
+  return mOutputFileNames;
+}
+
 void Processor::setInputFileNames(std::vector<std::string> inputFiles) {
   mInputFileNames.clear();
   for (auto fileName : inputFiles) {
@@ -58,4 +62,8 @@ void Processor::setInputFileNames(std::vector<std::string> inputFiles) {
     // FIXME this is not being used everywhere it should be....
     mInputFileNames.push_back(name);
   }
+}
+
+std::vector<std::string> Processor::getInputFileNames() {
+  return mInputFileNames;
 }

@@ -9,32 +9,38 @@ void ComputationChain::addProcessor(Processor &chain) {
   switch (mType) {
   case PROCESS_ASYNC:
     // FIXME check if process is already async, so there's no need to do this.
-    // FIXME free this on desgtructor
+    // FIXME free this on destructor
     mAsyncProcessesInternal.emplace_back(new ProcessorAsync(&chain));
-    mProcesses.push_back(mAsyncProcessesInternal.back());
+    mProcessors.push_back(mAsyncProcessesInternal.back());
     break;
   case PROCESS_SERIAL:
-    mProcesses.push_back(&chain);
+    mProcessors.push_back(&chain);
     break;
   }
 }
 
 bool ComputationChain::process(bool forceRecompute) {
   bool ret = true;
+  if (!mEnabled) {
+    // TODO should callbacks be called if disabled?
+    //    callDoneCallbacks(true);
+    return true;
+  }
   switch (mType) {
   case PROCESS_ASYNC:
-    for (auto chain : mProcesses) {
+    for (auto chain : mProcessors) {
       chain->process(forceRecompute);
     }
-    for (auto chain : mProcesses) {
+    for (auto chain : mProcessors) {
       ret &= ((ProcessorAsync *)chain)->waitUntilDone();
     }
     break;
   case PROCESS_SERIAL:
-    for (auto chain : mProcesses) {
+    for (auto chain : mProcessors) {
       ret &= chain->process(forceRecompute);
     }
     break;
   }
+  callDoneCallbacks(ret);
   return ret;
 }

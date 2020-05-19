@@ -20,13 +20,17 @@ public:
 
   bool process(bool forceRecompute = false);
 
+  void enable(bool e) { mEnabled = e; }
+
   ComputationChain &operator<<(Processor &processor) {
     addProcessor(processor);
     return *this;
   }
+  std::vector<Processor *> processors() { return mProcessors; }
 
 private:
-  std::vector<Processor *> mProcesses;
+  bool mEnabled{true};
+  std::vector<Processor *> mProcessors;
   std::vector<ProcessorAsync *> mAsyncProcessesInternal;
   std::mutex mChainLock;
   ChainType mType;

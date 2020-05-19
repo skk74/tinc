@@ -17,62 +17,7 @@
 
 namespace tinc {
 
-enum FlagType {
-  FLAG_INT = 0,
-  FLAG_DOUBLE, // The script to be run
-  FLAG_STRING
-};
-
-struct Flag {
-
-  Flag() {}
-  Flag(std::string value) {
-    type = FLAG_STRING;
-    flagValueStr = value;
-  }
-
-  Flag(int64_t value) {
-    type = FLAG_INT;
-    flagValueInt = value;
-  }
-
-  Flag(double value) {
-    type = FLAG_DOUBLE;
-    flagValueDouble = value;
-  }
-
-  //  ~Flag()
-  //  {
-  //      delete[] cstring;  // deallocate
-  //  }
-
-  //  Flag(const Flag& other) // copy constructor
-  //      : Flag(other.cstring)
-  //  {}
-
-  //  Flag(Flag&& other) noexcept // move constructor
-  //      : cstring(std::exchange(other.cstring, nullptr))
-  //  {}
-
-  //  Flag& operator=(const Flag& other) // copy assignment
-  //  {
-  //      return *this = Flag(other);
-  //  }
-
-  //  Flag& operator=(Flag&& other) noexcept // move assignment
-  //  {
-  //      std::swap(cstring, other.cstring);
-  //      return *this;
-  //  }
-
-  std::string commandFlag; // A prefix to the flag (e.g. -o)
-
-  FlagType type;
-  std::string flagValueStr;
-  int64_t flagValueInt;
-  double flagValueDouble;
-};
-
+// TODO move PushDirectory to allolib? Or its own file?
 class PushDirectory {
 public:
   PushDirectory(std::string directory, bool verbose = false);
@@ -89,59 +34,19 @@ private:
 /**
  * @brief The DataScript class
  *
- * You can use the DataScript class in two ways. First, you can use the
- * appendFlag() to add sequential flags to pass to the
- * script on the command line. The simplest usage looks like:
- *
- * DataScript ds("output_folder");
- * ds.setCommand("python");
- * ds.setRunningDirectory("/home/sweet/home");
- * ds.appendFlag("myscript.py", FLAG_SCRIPT);
- * ds.appendFlag("option");
- * ds.appendFlag("3.14159");
- * ds.process();
- *
- * You can override the configure() function for better control of the
- * passed arguments. This is a quick and easy way to set things up
- * and will work well when there is a small known set of parameters. You can
- * define any additional functions to get and set configuration options.
  *
  * @code
  *
- * class MyScript : public DataScript {
- * public:
- *     float value;
- *     void configure() override {
- *         setCommand("python");
- *         setRunningDirectory("/home/sweet/home");
- *         clearFlags();
- *         appendFlag("myscript.py", FLAG_SCRIPT);
- *         appendFlag("output_dir", FLAG_OUTPUT_DIR);
- *         appendFlag("option");
- *         appendFlag("3.14159");
- *         appendFlag(std::to_string(value));
- *     }
- * };
- *
- * void process() {
- *     DataScript ds;
- *     ds.value = 0.5;
- *     ds.process();
- *     std::string
- * }
+
  *
  * @endcode
  *
- * This will execute the command:
  *
  * @codeline
  * python myscript.py output_dir option 3.14159 0.5
  *
  * In the /home/sweet/home directory.
  *
- * For more complex scenarios, use the setConfiguration() function. This
- * will create a json file with the options that can then be read by the script
- * This provides the greatest flexibility and extensibility.
  */
 class DataScript : public Processor {
 public:
@@ -195,7 +100,7 @@ public:
    * system like :,/,\ etc. And will remove any characters like '.' that
    * can confuse the parsing of the name on read.
    */
-  std::string sanitizeName(std::string output_name);
+  static std::string sanitizeName(std::string output_name);
 
   bool processAsync(bool noWait = false,
                     std::function<void(bool)> doneCallback = nullptr);
@@ -210,9 +115,7 @@ public:
 
   void maxAsyncProcesses(int num) { mMaxAsyncProcesses = num; }
 
-  void verbose(bool verbose = true) { mVerbose = true; }
-
-  void registerDoneCallback() { throw "Not implemented yet."; }
+  void verbose(bool verbose = true) { mVerbose = verbose; }
 
   DataScript &registerParameter(al::ParameterMeta &param) {
     mParameters.push_back(&param);
@@ -222,11 +125,6 @@ public:
   DataScript &operator<<(al::ParameterMeta &newParam) {
     return registerParameter(newParam);
   }
-
-  /**
-   * @brief Add configuration key value pairs here
-   */
-  std::map<std::string, Flag> configuration;
 
 protected:
   // These need to be accessible by the subclass
@@ -249,8 +147,6 @@ private:
   std::thread mAsyncDoneThread;
   std::condition_variable mAsyncDoneTrigger;
   std::mutex mAsyncDoneTriggerLock;
-
-  std::function<void(bool ok)> mDoneCallback;
 
   std::string makeCommandLine();
 
@@ -317,23 +213,12 @@ public:
     for (size_t i = 0; i < allVecs[vecIndex].size(); i++) {
       indeces[vecIndex] = i;
       auto value = allVecs[vecIndex][i];
-      //            labelProcessor.setParams(chempot, std::to_string(i),
-      //            datasetId, mConfig.pythonScriptPath);
-      //            labelProcessor.process();
       processSpace(allVecs, vecIndex + 1, indeces);
     }
   }
 
   void start(std::vector<std::vector<std::string>> parameterSpace,
-             std::vector<std::pair<unsigned, unsigned>> parameterRanges) {
-    //        mParallelProcess = std::make_shared<std::thread>(
-    //                    [this](parameterSpace,parameterRanges) {
-    //                for (auto parameterValues: parameterSpace) {
-    //                auto interator =
-    //    }
-
-    //    });
-  }
+             std::vector<std::pair<unsigned, unsigned>> parameterRanges) {}
 
   void waitForEnd() {}
 

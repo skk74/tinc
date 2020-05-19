@@ -12,7 +12,7 @@ ProcessorAsync::ProcessorAsync(std::string id) : Processor(id) {
 }
 
 ProcessorAsync::ProcessorAsync(Processor *processor)
-    : Processor(), mProcessor(processor) {
+    : Processor(processor->id), mProcessor(processor) {
   startThread();
 }
 
@@ -61,11 +61,15 @@ void ProcessorAsync::startThread() {
       } else {
         mRetValue = this->process(mRequestForce);
       }
-      if (doneCallback) {
-        doneCallback(mRetValue);
-      }
+      callDoneCallbacks(mRetValue);
       //      std::cout << "completed thread process " << mProcessor->id <<
       //      std::endl;
     }
   });
+}
+
+Processor *ProcessorAsync::processor() const { return mProcessor; }
+
+void ProcessorAsync::setProcessor(Processor *processor) {
+  mProcessor = processor;
 }

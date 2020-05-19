@@ -109,9 +109,7 @@ bool DataScript::process(bool forceRecompute) {
                 << std::endl;
     }
   }
-  if (mDoneCallback) {
-    mDoneCallback(ok);
-  }
+  callDoneCallbacks(ok);
   return ok;
 }
 

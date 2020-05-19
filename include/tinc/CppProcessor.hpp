@@ -12,7 +12,9 @@ public:
   CppProcessor(std::string id = "");
 
   bool process(bool forceRecompute = false) override {
-    return processingFunction();
+    bool ret = processingFunction();
+    callDoneCallbacks(ret);
+    return ret;
   }
 
   std::function<bool(void)> processingFunction;

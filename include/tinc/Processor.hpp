@@ -8,7 +8,61 @@
 
 namespace tinc {
 
-// TODO move info about filenames to separate class
+enum FlagType {
+  FLAG_INT = 0,
+  FLAG_DOUBLE, // The script to be run
+  FLAG_STRING
+};
+
+struct Flag {
+
+  Flag() {}
+  Flag(std::string value) {
+    type = FLAG_STRING;
+    flagValueStr = value;
+  }
+
+  Flag(int64_t value) {
+    type = FLAG_INT;
+    flagValueInt = value;
+  }
+
+  Flag(double value) {
+    type = FLAG_DOUBLE;
+    flagValueDouble = value;
+  }
+
+  //  ~Flag()
+  //  {
+  //      delete[] cstring;  // deallocate
+  //  }
+
+  //  Flag(const Flag& other) // copy constructor
+  //      : Flag(other.cstring)
+  //  {}
+
+  //  Flag(Flag&& other) noexcept // move constructor
+  //      : cstring(std::exchange(other.cstring, nullptr))
+  //  {}
+
+  //  Flag& operator=(const Flag& other) // copy assignment
+  //  {
+  //      return *this = Flag(other);
+  //  }
+
+  //  Flag& operator=(Flag&& other) noexcept // move assignment
+  //  {
+  //      std::swap(cstring, other.cstring);
+  //      return *this;
+  //  }
+
+  std::string commandFlag; // A prefix to the flag (e.g. -o)
+
+  FlagType type;
+  std::string flagValueStr;
+  int64_t flagValueInt;
+  double flagValueDouble;
+};
 
 class Processor {
 public:
@@ -37,10 +91,23 @@ public:
   void setOutputFileNames(std::vector<std::string> outputFiles);
 
   /**
+   * @brief Query the current output filenames
+   */
+  std::vector<std::string> getOutputFileNames();
+
+  /**
    * @brief Set the names of input files
    * @param outputFiles list of output file names.
    */
   void setInputFileNames(std::vector<std::string> inputFiles);
+
+  // TODO how should the files synchronize to processing. Should these functions
+  // return only available files, or should they reflect the current settings?
+  // Perhaps we need two different functions
+  /**
+   * @brief Query the current input filenames
+   */
+  std::vector<std::string> getInputFileNames();
 
   /**
    * @brief Set the current directory for process to run in.
@@ -51,7 +118,16 @@ public:
   std::string outputDirectory() { return mOutputDirectory; }
   std::string runningDirectory() { return mRunningDirectory; }
 
+  void registerDoneCallback(std::function<void(bool)> func) {
+    mDoneCallbacks.push_back(func);
+  }
+
   std::string id;
+
+  /**
+   * @brief Add configuration key value pairs here
+   */
+  std::map<std::string, Flag> configuration;
 
 protected:
   std::string mRunningDirectory;
@@ -59,6 +135,15 @@ protected:
   std::string mInputDirectory;
   std::vector<std::string> mOutputFileNames;
   std::vector<std::string> mInputFileNames;
+
+  void callDoneCallbacks(bool result) {
+    for (auto cb : mDoneCallbacks) {
+      cb(result);
+    }
+  }
+
+private:
+  std::vector<std::function<void(bool)>> mDoneCallbacks;
 };
 
 } // namespace tinc

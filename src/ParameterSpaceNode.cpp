@@ -8,4 +8,5 @@ bool ParameterSpaceNode::consumeMessage(osc::Message &m,
   if (m.addressPattern().substr(0, sizeof(nodePrefix)) == nodePrefix) {
     return true;
   }
+  return false;
 }
