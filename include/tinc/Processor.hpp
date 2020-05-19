@@ -64,6 +64,8 @@ struct Flag {
   double flagValueDouble;
 };
 
+// You must call callDoneCallbacks() within the process() function of all child
+// classes. ( Should we wrap this to avoid user error here? )
 class Processor {
 public:
   Processor(std::string id_ = "") : id(id_) {
@@ -129,12 +131,29 @@ public:
    */
   std::map<std::string, Flag> configuration;
 
+  template <class ParameterType>
+  Processor &registerParameter(al::ParameterWrapper<ParameterType> &param) {
+    mParameters.push_back(&param);
+    param.registerChangeCallback([&](ParameterType value) {
+      configuration[param.getName()] = value;
+      process();
+    });
+    return *this;
+  }
+
+  template <class ParameterType>
+  Processor &operator<<(al::ParameterWrapper<ParameterType> &newParam) {
+    return registerParameter(newParam);
+  }
+
 protected:
   std::string mRunningDirectory;
   std::string mOutputDirectory{"cached_output/"};
   std::string mInputDirectory;
   std::vector<std::string> mOutputFileNames;
   std::vector<std::string> mInputFileNames;
+
+  std::vector<al::ParameterMeta *> mParameters;
 
   void callDoneCallbacks(bool result) {
     for (auto cb : mDoneCallbacks) {

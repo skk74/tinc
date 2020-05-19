@@ -117,20 +117,7 @@ public:
 
   void verbose(bool verbose = true) { mVerbose = verbose; }
 
-  DataScript &registerParameter(al::ParameterMeta &param) {
-    mParameters.push_back(&param);
-    return *this;
-  }
-
-  DataScript &operator<<(al::ParameterMeta &newParam) {
-    return registerParameter(newParam);
-  }
-
 protected:
-  // These need to be accessible by the subclass
-  std::vector<al::ParameterMeta *> mParameters;
-  al::ParameterServer *mParamServer;
-
   std::string writeJsonConfig();
 
   void parametersToConfig(nlohmann::json &j);
