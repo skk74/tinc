@@ -80,16 +80,10 @@ public:
                     std::vector<float> &mAligned4fData);
 
 protected:
-  std::string is_highlighted_func = R"( // Dummy function
-  bool is_highlighted(vec3 point) {
-      return true;
-  })";
-
   void renderInstances(al::Graphics &g, float scale,
                        std::vector<AtomData> &mAtomData,
                        std::vector<float> &mAligned4fData);
 
-private:
   std::string instancing_vert =
       R"(
 #version 330
@@ -199,6 +193,16 @@ void main()
     frag_out0 = color;
 }
 )";
+
+  virtual const std::string is_highlighted_func() {
+    return R"(
+  bool is_highlighted(vec3 point) {
+      // Dummy function.
+    return true;
+  })";
+  }
+
+private:
 };
 
 class SlicingAtomRenderer : public AtomRenderer {
@@ -229,7 +233,8 @@ public:
   void resetSlicing();
 
 protected:
-  std::string is_highlighted_func = R"( // Region Plane information
+  const std::string is_highlighted_func() override {
+    return R"( // Region Plane information
   uniform vec3 plane_normal = vec3(0, 0, -1);
   uniform vec3 plane_point = vec3(0.5, 0.5, 0.5);
   uniform float second_plane_distance = 3.0;
@@ -243,6 +248,7 @@ protected:
           return false;
       }
   })";
+  }
 };
 
 } // namespace tinc

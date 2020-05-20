@@ -55,7 +55,7 @@ void AtomRenderer::init() {
 
   std::size_t pos = instancing_vert.find(funcMarker);
   if (pos != std::string::npos) {
-    instancing_vert.replace(pos, funcMarker.length(), is_highlighted_func);
+    instancing_vert.replace(pos, funcMarker.length(), is_highlighted_func());
   }
   instancing_mesh0.init(instancing_vert, instancing_frag,
                         1,         // location
@@ -120,7 +120,6 @@ void AtomRenderer::renderInstances(Graphics &g, float scale,
 }
 
 void SlicingAtomRenderer::init() {
-
   AtomRenderer::init();
 
   mSliceRotationPitch.registerChangeCallback([this](float value) {
@@ -162,7 +161,7 @@ void SlicingAtomRenderer::draw(Graphics &g, float scale,
                                std::vector<AtomData> &mAtomData,
                                std::vector<float> &mAligned4fData) {
   gl::polygonFill();
-  int cumulativeCount = 0;
+  //  int cumulativeCount = 0;
   // now draw data with custom shaderg.shader(instancing_mesh0.shader);
   g.shader(instancing_mesh0.shader);
   g.shader().uniform("is_omni", 1.0f);
