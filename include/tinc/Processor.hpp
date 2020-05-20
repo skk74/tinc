@@ -21,6 +21,10 @@ struct Flag {
     type = FLAG_STRING;
     flagValueStr = value;
   }
+  Flag(const char *value) {
+    type = FLAG_STRING;
+    flagValueStr = value;
+  }
 
   Flag(int64_t value) {
     type = FLAG_INT;

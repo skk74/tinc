@@ -23,7 +23,7 @@ struct MyApp : public App {
     process << value;
     // Define processing function. The new value is avaialble through
     // the configuration member and the old value is available from the
-    // parameter as the new value has no been applied at this point
+    // parameter as the new value has not been applied at this point
     process.processingFunction = [&]() {
       std::cout << "new value: "
                 << process.configuration["value"].flagValueDouble
