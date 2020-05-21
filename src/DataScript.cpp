@@ -87,6 +87,10 @@ bool DataScript::process(bool forceRecompute) {
   if (!enabled) {
     return true;
   }
+  if (prepareFunction && !prepareFunction()) {
+    std::cerr << "ERROR preparing processor: " << id << std::endl;
+    return false;
+  }
   std::unique_lock<std::mutex> lk(mProcessingLock);
   if (mScriptName == "" || mScriptCommand == "") {
     std::cout << "ERROR: process() for '" << id
@@ -224,6 +228,8 @@ bool DataScript::waitForAsyncDone() {
 std::string DataScript::writeJsonConfig() {
   using json = nlohmann::json;
   json j;
+
+  j["__tinc_metadata_version"] = DATASCRIPT_META_FORMAT_VERSION;
   j["__output_dir"] = outputDirectory();
   j["__output_name"] = outputFile(false);
   j["__input_dir"] = inputDirectory();
@@ -348,7 +354,7 @@ bool DataScript::writeMeta() {
 
   nlohmann::json j;
 
-  j["__metadata_version"] = DATASCRIPT_META_FORMAT_VERSION;
+  j["__tinc_metadata_version"] = DATASCRIPT_META_FORMAT_VERSION;
   j["__script"] = scriptFile(false);
   j["__script_modified"] = modified(scriptFile().c_str());
   j["__running_directory"] = runningDirectory();
@@ -431,7 +437,7 @@ bool DataScript::needsRecompute() {
     return true;
   }
 
-  if (metaData["__metadata_version"] != DATASCRIPT_META_FORMAT_VERSION) {
+  if (metaData["__tinc_metadata_version"] != DATASCRIPT_META_FORMAT_VERSION) {
     if (mVerbose) {
       std::cout << "Metadata format mismatch. Forcing recompute" << std::endl;
     }

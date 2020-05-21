@@ -25,6 +25,10 @@ bool ComputationChain::process(bool forceRecompute) {
     //    callDoneCallbacks(true);
     return true;
   }
+  if (prepareFunction && !prepareFunction()) {
+    std::cerr << "ERROR preparing processor: " << id << std::endl;
+    return false;
+  }
   bool ret = true;
   switch (mType) {
   case PROCESS_ASYNC:
