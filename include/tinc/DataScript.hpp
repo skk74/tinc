@@ -102,6 +102,7 @@ public:
    */
   static std::string sanitizeName(std::string output_name);
 
+  // TODO remove these async calls
   bool processAsync(bool noWait = false,
                     std::function<void(bool)> doneCallback = nullptr);
 

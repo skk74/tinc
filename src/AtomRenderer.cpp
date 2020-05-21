@@ -64,7 +64,7 @@ void AtomRenderer::init() {
 
   instancing_shader.compile(instancing_vert, instancing_frag);
 
-  mMarkerScale = 0.3f;
+  mMarkerScale = 0.01f;
 }
 
 void AtomRenderer::setDataBoundaries(al::BoundingBoxData &b) {

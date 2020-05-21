@@ -84,6 +84,9 @@ std::string DataScript::outputFile(bool fullPath, int index) {
 }
 
 bool DataScript::process(bool forceRecompute) {
+  if (!enabled) {
+    return true;
+  }
   std::unique_lock<std::mutex> lk(mProcessingLock);
   if (mScriptName == "" || mScriptCommand == "") {
     std::cout << "ERROR: process() for '" << id

@@ -20,8 +20,6 @@ public:
 
   bool process(bool forceRecompute = false);
 
-  void enable(bool e) { mEnabled = e; }
-
   ComputationChain &operator<<(Processor &processor) {
     addProcessor(processor);
     return *this;
@@ -29,7 +27,6 @@ public:
   std::vector<Processor *> processors() { return mProcessors; }
 
 private:
-  bool mEnabled{true};
   std::vector<Processor *> mProcessors;
   std::vector<ProcessorAsync *> mAsyncProcessesInternal;
   std::mutex mChainLock;

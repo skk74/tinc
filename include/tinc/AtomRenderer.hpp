@@ -50,7 +50,7 @@ struct InstancingMesh {
 
 typedef struct {
   int counts;
-  float radius;
+  float radius = 1.0;
   std::string species;
 } AtomData;
 

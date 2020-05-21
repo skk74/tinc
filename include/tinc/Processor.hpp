@@ -68,8 +68,9 @@ struct Flag {
   double flagValueDouble;
 };
 
-// You must call callDoneCallbacks() within the process() function of all child
-// classes. ( Should we wrap this to avoid user error here? )
+// You must call callDoneCallbacks() and test for 'enabled' within the process()
+// function of all child classes. ( Should we wrap this to avoid user error
+// here? )
 class Processor {
 public:
   Processor(std::string id_ = "") : id(id_) {
@@ -129,11 +130,17 @@ public:
   }
 
   std::string id;
+  bool enabled{true};
 
   /**
    * @brief Add configuration key value pairs here
    */
   std::map<std::string, Flag> configuration;
+
+  //  /**
+  //     * @brief Set a function to be called
+  //     */
+  //    std::function<bool(void)> prepareFunction;
 
   template <class ParameterType>
   Processor &registerParameter(al::ParameterWrapper<ParameterType> &param) {

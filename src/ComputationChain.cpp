@@ -20,12 +20,12 @@ void ComputationChain::addProcessor(Processor &chain) {
 }
 
 bool ComputationChain::process(bool forceRecompute) {
-  bool ret = true;
-  if (!mEnabled) {
+  if (!enabled) {
     // TODO should callbacks be called if disabled?
     //    callDoneCallbacks(true);
     return true;
   }
+  bool ret = true;
   switch (mType) {
   case PROCESS_ASYNC:
     for (auto chain : mProcessors) {
