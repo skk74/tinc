@@ -17,7 +17,7 @@
 namespace tinc {
 
 /**
- * @brief The ParameterSpace class maps parameter values to string ids
+ * @brief The ParameterSpaceDimension class maps parameter values to string ids
  *
  * This allows mapping continuous parameters to string ids, for example
  * for mapping to directory structures
@@ -26,9 +26,9 @@ namespace tinc {
  * to have the final ids be deduced from the combinations of two parameters
  *
  */
-class ParameterSpace {
+class ParameterSpaceDimension {
 public:
-  ParameterSpace(std::string name, std::string group = "")
+  ParameterSpaceDimension(std::string name, std::string group = "")
       : mParameterValue(name, group) {}
 
   // Access to current
@@ -99,7 +99,7 @@ public:
 
   void push_back(float value, std::string id = "");
 
-  void addConnectedParameterSpace(ParameterSpace *paramSpace);
+  void addConnectedParameterSpace(ParameterSpaceDimension *paramSpace);
 
   // Protect parameter space (to avoid access during modification)
 
@@ -117,7 +117,7 @@ private:
   // Current state
   al::Parameter mParameterValue;
 
-  std::vector<ParameterSpace *> mConnectedSpaces;
+  std::vector<ParameterSpaceDimension *> mConnectedSpaces;
 };
 
 } // namespace tinc

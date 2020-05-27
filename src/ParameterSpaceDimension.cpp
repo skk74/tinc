@@ -1,8 +1,8 @@
-#include "tinc/ParameterSpace.hpp"
+#include "tinc/ParameterSpaceDimension.hpp"
 
 using namespace tinc;
 
-float ParameterSpace::at(size_t x) {
+float ParameterSpaceDimension::at(size_t x) {
   if (x < mValues.size()) {
     auto it = mValues.begin();
     std::advance(it, x);
@@ -12,7 +12,7 @@ float ParameterSpace::at(size_t x) {
   }
 }
 
-std::string ParameterSpace::idAt(size_t x) {
+std::string ParameterSpaceDimension::idAt(size_t x) {
   if (x < mValues.size()) {
     auto it = mValues.begin();
     std::advance(it, x);
@@ -22,15 +22,15 @@ std::string ParameterSpace::idAt(size_t x) {
   }
 }
 
-size_t ParameterSpace::size() { return mValues.size(); }
+size_t ParameterSpaceDimension::size() { return mValues.size(); }
 
-void ParameterSpace::clear() {
+void ParameterSpaceDimension::clear() {
   mParameterValue.min(FLT_MAX);
   mParameterValue.max(FLT_MIN);
   mValues.clear();
 }
 
-size_t ParameterSpace::getIndexForValue(float value) {
+size_t ParameterSpaceDimension::getIndexForValue(float value) {
   auto indeces = getAllIndeces(value);
   for (auto connectedSpace : mConnectedSpaces) {
     if (connectedSpace->size() > 0) {
@@ -54,7 +54,8 @@ size_t ParameterSpace::getIndexForValue(float value) {
   return -1;
 }
 
-size_t ParameterSpace::getFirstIndexForValue(float value, bool reverse) {
+size_t ParameterSpaceDimension::getFirstIndexForValue(float value,
+                                                      bool reverse) {
   int paramIndex = -1;
 
   if (!reverse) {
@@ -114,24 +115,28 @@ size_t ParameterSpace::getFirstIndexForValue(float value, bool reverse) {
   return paramIndex;
 }
 
-float ParameterSpace::getCurrentValue() {
+float ParameterSpaceDimension::getCurrentValue() {
   return mValues[getCurrentIndex()].second;
 }
 
-void ParameterSpace::setCurrentValue(float value) { parameter().set(value); }
+void ParameterSpaceDimension::setCurrentValue(float value) {
+  parameter().set(value);
+}
 
-size_t ParameterSpace::getCurrentIndex() {
+size_t ParameterSpaceDimension::getCurrentIndex() {
   return getIndexForValue(mParameterValue.get());
 }
 
-std::string ParameterSpace::getCurrentId() { return idAt(getCurrentIndex()); }
+std::string ParameterSpaceDimension::getCurrentId() {
+  return idAt(getCurrentIndex());
+}
 
-std::vector<std::string> ParameterSpace::getAllCurrentIds() {
+std::vector<std::string> ParameterSpaceDimension::getAllCurrentIds() {
   float value = getCurrentValue();
   return getAllIds(value);
 }
 
-std::vector<std::string> ParameterSpace::getAllIds(float value) {
+std::vector<std::string> ParameterSpaceDimension::getAllIds(float value) {
   size_t lowIndex = getFirstIndexForValue(value);
   size_t highIndex = getFirstIndexForValue(
       value, true); // Open range value (excluded from range)
@@ -148,12 +153,12 @@ std::vector<std::string> ParameterSpace::getAllIds(float value) {
   return ids;
 }
 
-std::vector<size_t> ParameterSpace::getAllCurrentIndeces() {
+std::vector<size_t> ParameterSpaceDimension::getAllCurrentIndeces() {
   float value = getCurrentValue();
   return getAllIndeces(value);
 }
 
-std::vector<size_t> ParameterSpace::getAllIndeces(float value) {
+std::vector<size_t> ParameterSpaceDimension::getAllIndeces(float value) {
   size_t lowIndex = getFirstIndexForValue(value);
   size_t highIndex = getFirstIndexForValue(
       value, true); // Open range value (excluded from range)
@@ -170,9 +175,9 @@ std::vector<size_t> ParameterSpace::getAllIndeces(float value) {
   return idxs;
 }
 
-al::Parameter &ParameterSpace::parameter() { return mParameterValue; }
+al::Parameter &ParameterSpaceDimension::parameter() { return mParameterValue; }
 
-void ParameterSpace::stepIncrement() {
+void ParameterSpaceDimension::stepIncrement() {
   size_t curIndex = getCurrentIndex();
   float temp = mParameterValue.get();
   if (int64_t(curIndex) <
@@ -201,7 +206,7 @@ void ParameterSpace::stepIncrement() {
   }
 }
 
-void ParameterSpace::stepDecrease() {
+void ParameterSpaceDimension::stepDecrease() {
   size_t curIndex = getCurrentIndex();
   float temp = mParameterValue.get();
   float nextTemp = temp;
@@ -222,7 +227,7 @@ void ParameterSpace::stepDecrease() {
   }
 }
 
-void ParameterSpace::push_back(float value, std::string id) {
+void ParameterSpaceDimension::push_back(float value, std::string id) {
   if (id == "") {
     std::stringstream
         ss; // Use stringstream for better handling of trailing zeros
@@ -251,17 +256,18 @@ void ParameterSpace::push_back(float value, std::string id) {
   }
 }
 
-void ParameterSpace::addConnectedParameterSpace(ParameterSpace *paramSpace) {
+void ParameterSpaceDimension::addConnectedParameterSpace(
+    ParameterSpaceDimension *paramSpace) {
   mConnectedSpaces.push_back(paramSpace);
 }
 
-void ParameterSpace::sort(
+void ParameterSpaceDimension::sort(
     std::function<bool(const std::pair<std::string, float> &a,
                        const std::pair<std::string, float> &b)>
         sortFunction) {
   std::sort(mValues.begin(), mValues.end(), sortFunction);
 }
 
-std::vector<std::pair<std::string, float>> ParameterSpace::values() {
+std::vector<std::pair<std::string, float>> ParameterSpaceDimension::values() {
   return mValues;
 }
