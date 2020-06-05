@@ -7,3 +7,6 @@
 [submodule "external/al_ext"]
 	path = external/al_ext
 	url = https://github.com/AlloSphere-Research-Group/al_ext
+[submodule "external/netcdf-c"]
+	path = external/netcdf-c
+	url = https://github.com/Unidata/netcdf-c.git

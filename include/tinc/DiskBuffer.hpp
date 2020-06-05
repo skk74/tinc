@@ -1,6 +1,7 @@
 #ifndef DISKBUFFER_HPP
 #define DISKBUFFER_HPP
 
+#include <fstream>
 #include <string>
 
 #include "al/io/al_File.hpp"
