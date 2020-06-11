@@ -30,18 +30,24 @@ bool ComputationChain::process(bool forceRecompute) {
     return false;
   }
   bool ret = true;
+  bool thisRet = true;
   switch (mType) {
   case PROCESS_ASYNC:
     for (auto chain : mProcessors) {
       chain->process(forceRecompute);
     }
     for (auto chain : mProcessors) {
+      // When running async ignoreFail has no effect
       ret &= ((ProcessorAsync *)chain)->waitUntilDone();
     }
     break;
   case PROCESS_SERIAL:
     for (auto chain : mProcessors) {
-      ret &= chain->process(forceRecompute);
+      thisRet = chain->process(forceRecompute);
+      ret &= thisRet;
+      if (!thisRet && !chain->ignoreFail) {
+        break;
+      }
     }
     break;
   }

@@ -10,7 +10,11 @@ struct MyApp : public App {
   NetCDFDiskBufferDouble buffer{"NetCDFBuffer", "test.cdf"};
   VAOMesh m;
 
-  void onInit() override { m.primitive(Mesh::LINE_STRIP); }
+  void onInit() override {
+    m.primitive(Mesh::LINE_STRIP);
+    data.push_back(rnd::normal());
+    data.push_back(rnd::normal());
+  }
 
   void onAnimate(double dt) override {
 
@@ -23,7 +27,7 @@ struct MyApp : public App {
         if (switcher) {
           valueCache = value;
         } else {
-          m.vertex(valueCache, value, -4);
+          m.vertex(valueCache, value, -8);
         }
         switcher = !switcher;
       }
@@ -55,8 +59,8 @@ struct MyApp : public App {
 
     /* Create the file. The NC_CLOBBER parameter tells netCDF to
      * overwrite this file, if it already exists.*/
-    if ((retval = nc_create(buffer.getCurrentFileName().c_str(), NC_CLOBBER,
-                            &ncid))) {
+    if ((retval = nc_create(buffer.getCurrentFileName().c_str(),
+                            NC_NETCDF4 | NC_CLOBBER, &ncid))) {
       return false;
     }
 
