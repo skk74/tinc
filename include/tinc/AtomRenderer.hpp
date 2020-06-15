@@ -50,13 +50,13 @@ struct InstancingMesh {
 
 typedef struct {
   int counts;
-  float radius = 1.0;
   std::string species;
+  float radius = 1.0;
+  al::Color color;
 } AtomData;
 
 class AtomRenderer {
 public:
-  std::vector<AtomData> mAtomData;
   al::BoundingBoxData dataBoundary;
 
   al::Parameter mAtomMarkerSize{"AtomMarkerSize", "", 0.4, "", 0.0, 5.0};
@@ -76,12 +76,12 @@ public:
   virtual void setDataBoundaries(al::BoundingBoxData &b);
 
   virtual void draw(al::Graphics &g, float scale,
-                    std::vector<AtomData> &mAtomData,
+                    std::map<std::string, AtomData> &mAtomData,
                     std::vector<float> &mAligned4fData);
 
 protected:
   void renderInstances(al::Graphics &g, float scale,
-                       std::vector<AtomData> &mAtomData,
+                       std::map<std::string, AtomData> &mAtomData,
                        std::vector<float> &mAligned4fData);
 
   std::string instancing_vert =
@@ -224,7 +224,7 @@ public:
   virtual void setDataBoundaries(al::BoundingBoxData &b) override;
 
   virtual void draw(al::Graphics &g, float scale,
-                    std::vector<AtomData> &mAtomData,
+                    std::map<std::string, AtomData> &mAtomData,
                     std::vector<float> &mAligned4fData) override;
   void nextLayer();
 

@@ -72,7 +72,7 @@ void AtomRenderer::setDataBoundaries(al::BoundingBoxData &b) {
 }
 
 void AtomRenderer::draw(al::Graphics &g, float scale,
-                        std::vector<AtomData> &mAtomData,
+                        std::map<std::string, AtomData> &mAtomData,
                         std::vector<float> &mAligned4fData) {
   gl::polygonFill();
   // now draw data with custom shaderg.shader(instancing_mesh0.shader);
@@ -89,19 +89,19 @@ void AtomRenderer::draw(al::Graphics &g, float scale,
 }
 
 void AtomRenderer::renderInstances(Graphics &g, float scale,
-                                   std::vector<AtomData> &mAtomData,
+                                   std::map<std::string, AtomData> &mAtomData,
                                    std::vector<float> &mAligned4fData) {
 
   int cumulativeCount = 0;
   for (auto data : mAtomData) {
     if (mShowRadius == 1.0f) {
-      g.shader().uniform("markerScale",
-                         data.radius * mAtomMarkerSize * mMarkerScale / scale);
+      g.shader().uniform("markerScale", data.second.radius * mAtomMarkerSize *
+                                            mMarkerScale / scale);
       //                std::cout << data.radius << std::endl;
     } else {
       g.shader().uniform("markerScale", mAtomMarkerSize * mMarkerScale / scale);
     }
-    int count = data.counts;
+    int count = data.second.counts;
     assert((int)mAligned4fData.size() >= (cumulativeCount + count) * 4);
     instancing_mesh0.attrib_data(count * 4 * sizeof(float),
                                  mAligned4fData.data() + (cumulativeCount * 4),
@@ -158,7 +158,7 @@ void SlicingAtomRenderer::setDataBoundaries(BoundingBoxData &b) {
 }
 
 void SlicingAtomRenderer::draw(Graphics &g, float scale,
-                               std::vector<AtomData> &mAtomData,
+                               std::map<std::string, AtomData> &mAtomData,
                                std::vector<float> &mAligned4fData) {
   gl::polygonFill();
   //  int cumulativeCount = 0;
