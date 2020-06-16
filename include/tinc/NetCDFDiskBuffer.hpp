@@ -3,7 +3,9 @@
 
 #include "tinc/DiskBuffer.hpp"
 
+#ifdef TINC_HAS_NETCDF
 #include <netcdf.h>
+#endif
 
 namespace tinc {
 
@@ -31,7 +33,13 @@ class NetCDFDiskBufferDouble : public DiskBuffer<std::vector<double>> {
 public:
   NetCDFDiskBufferDouble(std::string name, std::string fileName = "",
                          std::string path = "", uint16_t size = 2)
-      : DiskBuffer<std::vector<double>>(name, fileName, path, size) {}
+      : DiskBuffer<std::vector<double>>(name, fileName, path, size) {
+#ifndef TINC_HAS_NETCDF
+    std::cerr << "ERROR: NetCDFDiskBufferDouble built wihtout NetCDF support"
+              << std::endl;
+    assert(0 == 1);
+#endif
+  }
 
   bool updateData(std::string filename) {
     if (filename.size() > 0) {
@@ -42,6 +50,7 @@ public:
 
     int ncid, retval;
 
+#ifdef TINC_HAS_NETCDF
     /* Open the file. NC_NOWRITE tells netCDF we want read-only access
      * to the file.*/
     if ((retval = nc_open(filename.c_str(), NC_NOWRITE, &ncid))) {
@@ -83,6 +92,7 @@ public:
     if ((retval = nc_close(ncid))) {
       return false;
     }
+#endif
 
     BufferManager<std::vector<double>>::doneWriting(buffer);
     return true;

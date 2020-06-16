@@ -49,6 +49,7 @@ set_target_properties(tinc PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_LIST_DIR}/bin
 )
 
+##### Binary dependencies
 set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/external/usr)
 message(" ********** ${CMAKE_CURRENT_LIST_DIR}/external/usr")
 FIND_PACKAGE(HDF5 COMPONENTS C HL REQUIRED)
@@ -57,9 +58,26 @@ FIND_LIBRARY(NETCDF_LIBRARY netCDF
   ${CMAKE_CURRENT_LIST_DIR}/external/usr/lib
   )
 
+if(HDF5_FOUND)
+  message("Using HDF5 root: ${HDF5_LIBRARIES}")
+  target_compile_definitions(tinc PUBLIC -DTINC_HAS_HDF5)
+  target_link_libraries(tinc PUBLIC ${HDF5_LIBRARIES})
+  target_link_directories(tinc PUBLIC ${CMAKE_CURRENT_LIST_DIR}/external/usr/lib)
+else()
+
+endif(HDF5_FOUND)
+
+if(NETCDF_LIBRARY AND HDF5_FOUND)
+  message("Using NetCDF: ${NETCDF_LIBRARY}")
+  target_compile_definitions(tinc PUBLIC -DTINC_HAS_NETCDF)
+  target_link_libraries(tinc PUBLIC ${NETCDF_LIBRARY})
+  target_link_directories(tinc PUBLIC ${CMAKE_CURRENT_LIST_DIR}/external/usr/lib)
+else()
+
+endif(NETCDF_LIBRARY AND HDF5_FOUND)
+
+##### In tree build dependencies
 include(buildDependencies.cmake)
 
-target_link_directories(tinc PUBLIC ${CMAKE_CURRENT_LIST_DIR}/external/usr/lib)
-target_link_libraries(tinc PUBLIC ${NETCDF_LIBRARY} ${HDF5_LIBRARIES})
-
+##### Examples
 add_subdirectory(examples)
