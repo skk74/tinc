@@ -4,19 +4,16 @@ using namespace tinc;
 
 float ParameterSpaceDimension::at(size_t x) {
   if (x < mValues.size()) {
-    auto it = mValues.begin();
-    std::advance(it, x);
-    return it->second;
-  } else {
-    return 0.0f;
+    return mValues[x];
   }
+  return 0.0f;
 }
 
 std::string ParameterSpaceDimension::idAt(size_t x) {
-  if (x < mValues.size()) {
-    auto it = mValues.begin();
-    std::advance(it, x);
-    return it->first;
+  if (x < mIds.size()) {
+    return mIds[x];
+  } else if (mIds.size() == 0 && x < mValues.size()) {
+    return std::to_string(mValues[x]);
   } else {
     return std::string();
   }
@@ -25,9 +22,12 @@ std::string ParameterSpaceDimension::idAt(size_t x) {
 size_t ParameterSpaceDimension::size() { return mValues.size(); }
 
 void ParameterSpaceDimension::clear() {
+  lock();
   mParameterValue.min(FLT_MAX);
   mParameterValue.max(FLT_MIN);
   mValues.clear();
+  mIds.clear();
+  unlock();
 }
 
 size_t ParameterSpaceDimension::getIndexForValue(float value) {
@@ -48,10 +48,7 @@ size_t ParameterSpaceDimension::getIndexForValue(float value) {
       indeces = commonIndeces;
     }
   }
-  if (indeces.size() == 1) {
-    return indeces[0];
-  }
-  return -1;
+  return indeces[0];
 }
 
 size_t ParameterSpaceDimension::getFirstIndexForValue(float value,
@@ -61,21 +58,20 @@ size_t ParameterSpaceDimension::getFirstIndexForValue(float value,
   if (!reverse) {
     size_t i = 0;
     for (auto it = mValues.begin(); it != mValues.end(); it++) {
-      if (it->second == value) {
+      if (*it == value) {
         paramIndex = i;
         break;
-      } else if (it->second > value && (i == mValues.size() - 1)) {
+      } else if (*it > value && (i == mValues.size() - 1)) {
         break;
       }
       auto next = it;
       std::advance(next, 1);
       if (next != mValues.end()) {
-        if (it->second > value &&
-            next->second < value) { // space is sorted and descending
+        if (*it > value && *next < value) { // space is sorted and descending
           paramIndex = i;
           break;
-        } else if (it->second < value &&
-                   next->second > value) { // space is sorted and ascending
+        } else if (*it<value && * next>
+                       value) { // space is sorted and ascending
           paramIndex = i + 1;
           break;
         }
@@ -86,21 +82,20 @@ size_t ParameterSpaceDimension::getFirstIndexForValue(float value,
     value = at(getFirstIndexForValue(value));
     size_t i = mValues.size();
     for (auto it = mValues.rbegin(); it != mValues.rend(); it++) {
-      if (it->second == value) {
+      if (*it == value) {
         paramIndex = i;
         break;
-      } else if (it->second < value && (i == 0)) {
+      } else if (*it < value && (i == 0)) {
         break;
       }
       auto next = it;
       std::advance(next, 1);
       if (next != mValues.rend()) {
-        if (it->second < value &&
-            next->second > value) { // space is sorted and descending
+        if (*it<value && * next> value) { // space is sorted and descending
           paramIndex = i;
           break;
-        } else if (it->second > value &&
-                   next->second < value) { // space is sorted and ascending
+        } else if (*it > value &&
+                   *next < value) { // space is sorted and ascending
           paramIndex = i - 1;
           break;
         }
@@ -116,7 +111,7 @@ size_t ParameterSpaceDimension::getFirstIndexForValue(float value,
 }
 
 float ParameterSpaceDimension::getCurrentValue() {
-  return mValues[getCurrentIndex()].second;
+  return mValues[getCurrentIndex()];
 }
 
 void ParameterSpaceDimension::setCurrentValue(float value) {
@@ -228,24 +223,15 @@ void ParameterSpaceDimension::stepDecrease() {
 }
 
 void ParameterSpaceDimension::push_back(float value, std::string id) {
-  if (id == "") {
-    std::stringstream
-        ss; // Use stringstream for better handling of trailing zeros
-    ss << value;
-    id = ss.str();
-  }
+  mValues.emplace_back(value);
 
-  bool found = false;
-  for (auto it = mValues.begin(); it != mValues.end(); it++) {
-    if (it->first == id) {
-      it->second = value;
-      found = true;
-      break; // Assume ids are unique
+  if (id.size() > 0) {
+    mIds.push_back(id);
+    if (mIds.size() != mValues.size()) {
+      std::cerr
+          << " ERROR! value and id mismatch in parameter space! This is bad."
+          << std::endl;
     }
-  }
-
-  if (!found) {
-    mValues.emplace_back(std::pair<std::string, float>(id, value));
   }
 
   if (value > mParameterValue.max()) {
@@ -256,18 +242,75 @@ void ParameterSpaceDimension::push_back(float value, std::string id) {
   }
 }
 
+void ParameterSpaceDimension::append(float *values, size_t count,
+                                     std::string idprefix) {
+  size_t oldSize = mValues.size();
+  mValues.resize(mValues.size() + count);
+  auto valueIt = mValues.begin() + oldSize;
+  auto idIt = mIds.begin() + oldSize;
+  bool useIds = false;
+  if (mIds.size() > 0 || idprefix.size() > 0) {
+    useIds = true;
+  }
+  for (size_t i = 0; i < count; i++) {
+    if (useIds) {
+      *idIt = idprefix + std::to_string(*values);
+      idIt++;
+    }
+    *valueIt = *values;
+    values++;
+    valueIt++;
+  }
+}
+
+void ParameterSpaceDimension::reserve(size_t totalSize) {
+  mValues.reserve(totalSize);
+}
+
 void ParameterSpaceDimension::addConnectedParameterSpace(
     ParameterSpaceDimension *paramSpace) {
   mConnectedSpaces.push_back(paramSpace);
 }
 
-void ParameterSpaceDimension::sort(
-    std::function<bool(const std::pair<std::string, float> &a,
-                       const std::pair<std::string, float> &b)>
-        sortFunction) {
-  std::sort(mValues.begin(), mValues.end(), sortFunction);
+class sort_indices {
+private:
+  float *mFloatArray;
+
+public:
+  sort_indices(float *floatArray) : mFloatArray(floatArray) {}
+  bool operator()(size_t i, size_t j) const {
+    return mFloatArray[i] < mFloatArray[j];
+  }
+};
+
+void ParameterSpaceDimension::sort() {
+  lock();
+
+  std::vector<size_t> indeces;
+  indeces.resize(mValues.size());
+  for (size_t i = 0; i < indeces.size(); i++) {
+    indeces[i] = i;
+  }
+  std::sort(indeces.begin(), indeces.end(), sort_indices(mValues.data()));
+  std::vector<float> newValues;
+  std::vector<std::string> newIds;
+  newValues.reserve(indeces.size());
+  newIds.reserve(indeces.size());
+  if (mValues.size() != mIds.size() && mIds.size() > 0) {
+    std::cerr << "ERROR: sort() will crash (or lead ot unexpected behavior) as "
+                 "the size of values and ids don't match."
+              << std::endl;
+  }
+  for (size_t i = 0; i < indeces.size(); i++) {
+    size_t index = indeces[i];
+    newValues.push_back(mValues[index]);
+    if (mIds.size() > 0) {
+      newIds.push_back(mIds[index]);
+    }
+  }
+  mValues = newValues;
+  mIds = newIds;
+  unlock();
 }
 
-std::vector<std::pair<std::string, float>> ParameterSpaceDimension::values() {
-  return mValues;
-}
+std::vector<float> ParameterSpaceDimension::values() { return mValues; }

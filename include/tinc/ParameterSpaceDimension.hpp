@@ -74,7 +74,7 @@ public:
 
   std::vector<size_t> getAllIndeces(float value);
 
-  std::vector<std::pair<std::string, float>> values();
+  std::vector<float> values();
 
   // Move parameter space
 
@@ -85,19 +85,17 @@ public:
   //
   size_t size();
 
-  // Modification of parameter space. These are not protected by the lock, the
-  // user needs to lock as needed
-  void sort(std::function<bool(const std::pair<std::string, float> &a,
-                               const std::pair<std::string, float> &b)>
-                sortFunction =
-                    [](const std::pair<std::string, float> &a,
-                       const std::pair<std::string, float> &b) -> bool {
-    return a.second < b.second;
-  });
+  void sort();
 
   void clear();
 
+  // There is no check to see if value is already present. Could cause trouble
+  // if value is there already.
   void push_back(float value, std::string id = "");
+
+  void append(float *values, size_t count, std::string idprefix = "");
+
+  void reserve(size_t totalSize);
 
   void addConnectedParameterSpace(ParameterSpaceDimension *paramSpace);
 
@@ -110,7 +108,8 @@ public:
 
 private:
   // Data
-  std::vector<std::pair<std::string, float>> mValues;
+  std::vector<float> mValues;
+  std::vector<std::string> mIds;
 
   std::mutex mLock;
 

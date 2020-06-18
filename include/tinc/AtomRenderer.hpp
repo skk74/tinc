@@ -67,7 +67,7 @@ public:
   al::ParameterChoice mShowAtoms{"ShowAtoms"};
 
   al::ShaderProgram instancing_shader;
-  InstancingMesh instancing_mesh0;
+  InstancingMesh instancingMesh;
 
   float mMarkerScale; // Global marker scaling factor
 
