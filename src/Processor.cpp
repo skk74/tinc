@@ -6,6 +6,12 @@
 
 using namespace tinc;
 
+void Processor::setDirectory(std::string directory) {
+  setOutputDirectory(directory);
+  setInputDirectory(directory);
+  setRunningDirectory(directory);
+}
+
 void Processor::setOutputDirectory(std::string outputDirectory) {
   mOutputDirectory = al::File::conformPathToOS(outputDirectory);
   std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');

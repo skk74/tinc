@@ -81,6 +81,12 @@ public:
   }
   virtual ~Processor() {}
   virtual bool process(bool forceRecompute = false) = 0;
+
+  /**
+   * @brief Convenience function to set input, output and running directory
+   */
+  void setDirectory(std::string directory);
+
   /**
    * @brief Set the directory for output files
    */
