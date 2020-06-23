@@ -8,6 +8,7 @@ set(TINC_SRC
     ${CMAKE_CURRENT_LIST_DIR}/src/ComputationChain.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/CppProcessor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/DataScript.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpaceDimension.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpaceNode.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Processor.cpp
@@ -29,6 +30,7 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/ImageDiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/JsonDiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/NetCDFDiskBuffer.hpp
+    ${TINC_INCLUDE_PATH}/tinc/ParameterSpace.hpp
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpaceDimension.hpp
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpaceNode.hpp
     ${TINC_INCLUDE_PATH}/tinc/Processor.hpp

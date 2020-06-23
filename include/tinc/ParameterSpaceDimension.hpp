@@ -27,6 +27,8 @@ namespace tinc {
  *
  */
 class ParameterSpaceDimension {
+  friend class ParameterSpace;
+
 public:
   ParameterSpaceDimension(std::string name, std::string group = "")
       : mParameterValue(name, group) {}
@@ -40,6 +42,8 @@ public:
   size_t getCurrentIndex();
 
   std::string getCurrentId();
+
+  std::string getName();
 
   // the parameter instance holds the current value.
   // You can set values for parameter space through this function
@@ -75,6 +79,7 @@ public:
   std::vector<size_t> getAllIndeces(float value);
 
   std::vector<float> values();
+  std::vector<std::string> ids();
 
   // Move parameter space
 
@@ -94,6 +99,7 @@ public:
   void push_back(float value, std::string id = "");
 
   void append(float *values, size_t count, std::string idprefix = "");
+  void append(int *values, size_t count, std::string idprefix = "");
 
   void reserve(size_t totalSize);
 

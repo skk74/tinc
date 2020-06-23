@@ -126,6 +126,8 @@ std::string ParameterSpaceDimension::getCurrentId() {
   return idAt(getCurrentIndex());
 }
 
+std::string ParameterSpaceDimension::getName() { return parameter().getName(); }
+
 std::vector<std::string> ParameterSpaceDimension::getAllCurrentIds() {
   float value = getCurrentValue();
   return getAllIds(value);
@@ -263,6 +265,27 @@ void ParameterSpaceDimension::append(float *values, size_t count,
   }
 }
 
+void ParameterSpaceDimension::append(int *values, size_t count,
+                                     std::string idprefix) {
+  size_t oldSize = mValues.size();
+  mValues.resize(mValues.size() + count);
+  auto valueIt = mValues.begin() + oldSize;
+  auto idIt = mIds.begin() + oldSize;
+  bool useIds = false;
+  if (mIds.size() > 0 || idprefix.size() > 0) {
+    useIds = true;
+  }
+  for (size_t i = 0; i < count; i++) {
+    if (useIds) {
+      *idIt = idprefix + std::to_string(*values);
+      idIt++;
+    }
+    *valueIt = *values;
+    values++;
+    valueIt++;
+  }
+}
+
 void ParameterSpaceDimension::reserve(size_t totalSize) {
   mValues.reserve(totalSize);
 }
@@ -314,3 +337,5 @@ void ParameterSpaceDimension::sort() {
 }
 
 std::vector<float> ParameterSpaceDimension::values() { return mValues; }
+
+std::vector<std::string> ParameterSpaceDimension::ids() { return mIds; }
