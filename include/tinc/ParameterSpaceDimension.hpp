@@ -32,31 +32,20 @@ class ParameterSpaceDimension {
 public:
   ParameterSpaceDimension(std::string name, std::string group = "")
       : mParameterValue(name, group) {}
+  std::string getName();
 
   // Access to current
-
   float getCurrentValue();
-
   void setCurrentValue(float value);
 
   size_t getCurrentIndex();
-
   std::string getCurrentId();
-
-  std::string getName();
-
-  // the parameter instance holds the current value.
-  // You can set values for parameter space through this function
-  // Register notifications and create GUIs/ network synchronization
-  // Through this instance.
-  al::Parameter &parameter();
 
   // Multidimensional parameter spaces will result in single values having
   // multiple ids. This can be resolved externally using this function
   // but perhaps we should have a higher level class that solves this issue for
   // the general case
   std::vector<std::string> getAllCurrentIds();
-
   std::vector<size_t> getAllCurrentIndeces();
 
   // Access to specific elements
@@ -69,29 +58,30 @@ public:
   float at(size_t x);
 
   std::string idAt(size_t x);
-
   size_t getIndexForValue(float value);
-
-  // Access to complete sets
-
   std::vector<std::string> getAllIds(float value);
-
   std::vector<size_t> getAllIndeces(float value);
 
+  // Access to complete sets
   std::vector<float> values();
   std::vector<std::string> ids();
+
+  // the parameter instance holds the current value.
+  // You can set values for parameter space through this function
+  // Register notifications and create GUIs/ network synchronization
+  // Through this instance.
+  al::Parameter &parameter();
 
   // Move parameter space
 
   void stepIncrement();
-
   void stepDecrease();
 
   //
   size_t size();
+  void reserve(size_t totalSize);
 
   void sort();
-
   void clear();
 
   // There is no check to see if value is already present. Could cause trouble
@@ -101,15 +91,14 @@ public:
   void append(float *values, size_t count, std::string idprefix = "");
   void append(int *values, size_t count, std::string idprefix = "");
 
-  void reserve(size_t totalSize);
+  // Set limits from internal data
+  void conform();
 
   void addConnectedParameterSpace(ParameterSpaceDimension *paramSpace);
 
   // Protect parameter space (to avoid access during modification)
-
   // TODO all readers above need to use this lock
   void lock() { mLock.lock(); }
-
   void unlock() { mLock.unlock(); }
 
 private:

@@ -286,6 +286,20 @@ void ParameterSpaceDimension::append(int *values, size_t count,
   }
 }
 
+void ParameterSpaceDimension::conform() {
+  mParameterValue.max(std::numeric_limits<float>::min());
+  mParameterValue.min(std::numeric_limits<float>::max());
+  for (auto value : mValues) {
+
+    if (value > mParameterValue.max()) {
+      mParameterValue.max(value);
+    }
+    if (value < mParameterValue.min()) {
+      mParameterValue.min(value);
+    }
+  }
+}
+
 void ParameterSpaceDimension::reserve(size_t totalSize) {
   mValues.reserve(totalSize);
 }

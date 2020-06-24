@@ -15,6 +15,10 @@ public:
   ParameterSpace();
 
   std::shared_ptr<ParameterSpaceDimension> getDimension(std::string name) {
+
+    if (parameterNameMap.find(name) != parameterNameMap.end()) {
+      name = parameterNameMap[name];
+    }
     for (auto ps : parameters) {
       if (ps->parameter().getName() == name) {
         return ps;
@@ -34,22 +38,25 @@ public:
   }
 
   void registerParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimension.get()); });
     parameters.push_back(dimension);
+    ParameterSpaceDimension *dimensionPtr = dimension.get();
+    dimension->parameter().registerChangeCallback(
+        [&](float value) { mChangeCallback(value, dimensionPtr); });
   }
 
   void
   registerMappedParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimension.get()); });
     mappedParameters.push_back(dimension);
+    ParameterSpaceDimension *dimensionPtr = dimension.get();
+    dimension->parameter().registerChangeCallback(
+        [&](float value) { mChangeCallback(value, dimensionPtr); });
   }
 
   void registerCondition(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimension.get()); });
     conditionParameters.push_back(dimension);
+    ParameterSpaceDimension *dimensionPtr = dimension.get();
+    dimension->parameter().registerChangeCallback(
+        [&](float value) { mChangeCallback(value, dimensionPtr); });
   }
 
   // These should not be modifed by the user (perhaps make private?)
@@ -59,6 +66,11 @@ public:
   std::vector<std::shared_ptr<ParameterSpaceDimension>>
       conditionParameters; // map to filesystem
 
+  // To map names provided to getDimension() to internal data names
+  // You can also use this map to display user friendly names when displaying
+  // parameters
+  std::map<std::string, std::string> parameterNameMap;
+
   static ParameterSpace loadFromNetCDF(std::string ncFile);
 
   void registerChangeCallback(
@@ -67,7 +79,8 @@ public:
   }
 
 private:
-  std::function<void(float, ParameterSpaceDimension *)> mChangeCallback;
+  std::function<void(float, ParameterSpaceDimension *)> mChangeCallback =
+      [](float, ParameterSpaceDimension *) {};
 };
 } // namespace tinc
 
