@@ -39,24 +39,30 @@ public:
 
   void registerParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
     parameters.push_back(dimension);
-    ParameterSpaceDimension *dimensionPtr = dimension.get();
     dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimensionPtr); });
+        [dimension, this](float value) {
+          std::cout << value << dimension->getName() << std::endl;
+          mChangeCallback(value, dimension.get());
+        });
   }
 
   void
   registerMappedParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
     mappedParameters.push_back(dimension);
-    ParameterSpaceDimension *dimensionPtr = dimension.get();
     dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimensionPtr); });
+        [dimension, this](float value) {
+          std::cout << value << dimension->getName() << std::endl;
+          this->mChangeCallback(value, dimension.get());
+        });
   }
 
   void registerCondition(std::shared_ptr<ParameterSpaceDimension> dimension) {
     conditionParameters.push_back(dimension);
-    ParameterSpaceDimension *dimensionPtr = dimension.get();
     dimension->parameter().registerChangeCallback(
-        [&](float value) { mChangeCallback(value, dimensionPtr); });
+        [dimension, this](float value) {
+          std::cout << value << dimension->getName() << std::endl;
+          this->mChangeCallback(value, dimension.get());
+        });
   }
 
   // These should not be modifed by the user (perhaps make private?)
@@ -71,16 +77,18 @@ public:
   // parameters
   std::map<std::string, std::string> parameterNameMap;
 
-  static ParameterSpace loadFromNetCDF(std::string ncFile);
+  void loadFromNetCDF(std::string ncFile);
 
   void registerChangeCallback(
       std::function<void(float, ParameterSpaceDimension *)> changeCallback) {
     mChangeCallback = changeCallback;
   }
 
-private:
+protected:
   std::function<void(float, ParameterSpaceDimension *)> mChangeCallback =
       [](float, ParameterSpaceDimension *) {};
+
+private:
 };
 } // namespace tinc
 

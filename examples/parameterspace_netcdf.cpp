@@ -1,7 +1,8 @@
 #include "tinc/ParameterSpace.hpp"
 
 int main() {
-  tinc::ParameterSpace ps = tinc::ParameterSpace::loadFromNetCDF(
+  tinc::ParameterSpace ps;
+  ps.loadFromNetCDF(
       "/Users/lt01/code/casm_viewer/vdv_data/NaCoO2_diffusion/monte_with_com/"
       "cached_output/_parameter_space.nc");
 
