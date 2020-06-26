@@ -90,6 +90,7 @@ public:
 
   void append(float *values, size_t count, std::string idprefix = "");
   void append(int *values, size_t count, std::string idprefix = "");
+  void append(uint32_t *values, size_t count, std::string idprefix = "");
 
   // Set limits from internal data
   void conform();
