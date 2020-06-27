@@ -17,20 +17,6 @@
 
 namespace tinc {
 
-// TODO move PushDirectory to allolib? Or its own file?
-class PushDirectory {
-public:
-  PushDirectory(std::string directory, bool verbose = false);
-
-  ~PushDirectory();
-
-private:
-  char previousDirectory[512];
-  bool mVerbose;
-
-  static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
-};
-
 /**
  * @brief The DataScript class
  *
@@ -116,8 +102,6 @@ public:
 
   void maxAsyncProcesses(int num) { mMaxAsyncProcesses = num; }
 
-  void verbose(bool verbose = true) { mVerbose = verbose; }
-
 protected:
   std::string writeJsonConfig();
 
@@ -128,7 +112,6 @@ private:
   std::string mScriptName;
 
   std::mutex mProcessingLock;
-  bool mVerbose;
   int mMaxAsyncProcesses{4};
   std::atomic<int> mNumAsyncProcesses{0};
   std::vector<std::thread> mAsyncThreads;

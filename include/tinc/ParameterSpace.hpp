@@ -2,6 +2,7 @@
 #define PARAMETERSPACE_HPP
 
 #include "tinc/ParameterSpaceDimension.hpp"
+#include "tinc/Processor.hpp"
 
 #include <functional>
 #include <memory>
@@ -14,56 +15,37 @@ class ParameterSpace {
 public:
   ParameterSpace();
 
-  std::shared_ptr<ParameterSpaceDimension> getDimension(std::string name) {
+  std::shared_ptr<ParameterSpaceDimension> getDimension(std::string name);
 
-    if (parameterNameMap.find(name) != parameterNameMap.end()) {
-      name = parameterNameMap[name];
-    }
-    for (auto ps : parameters) {
-      if (ps->parameter().getName() == name) {
-        return ps;
-      }
-    }
-    for (auto ps : mappedParameters) {
-      if (ps->parameter().getName() == name) {
-        return ps;
-      }
-    }
-    for (auto ps : conditionParameters) {
-      if (ps->parameter().getName() == name) {
-        return ps;
-      }
-    }
-    return nullptr;
-  }
-
-  void registerParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    parameters.push_back(dimension);
-    dimension->parameter().registerChangeCallback(
-        [dimension, this](float value) {
-          std::cout << value << dimension->getName() << std::endl;
-          mChangeCallback(value, dimension.get());
-        });
-  }
+  void registerParameter(std::shared_ptr<ParameterSpaceDimension> dimension);
 
   void
-  registerMappedParameter(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    mappedParameters.push_back(dimension);
-    dimension->parameter().registerChangeCallback(
-        [dimension, this](float value) {
-          std::cout << value << dimension->getName() << std::endl;
-          this->mChangeCallback(value, dimension.get());
-        });
-  }
+  registerMappedParameter(std::shared_ptr<ParameterSpaceDimension> dimension);
 
-  void registerCondition(std::shared_ptr<ParameterSpaceDimension> dimension) {
-    conditionParameters.push_back(dimension);
-    dimension->parameter().registerChangeCallback(
-        [dimension, this](float value) {
-          std::cout << value << dimension->getName() << std::endl;
-          this->mChangeCallback(value, dimension.get());
-        });
-  }
+  void registerCondition(std::shared_ptr<ParameterSpaceDimension> dimension);
+
+  /**
+   * @brief Returns all the paths that are used by the whole parameter space
+   */
+  std::vector<std::string> paths();
+
+  /**
+   * @brief Returns the names of all dimensions
+   */
+  std::vector<std::string> dimensions();
+
+  /**
+   * @brief Returns the names of all dimensions that affect filesystem
+   * directories
+   * @return
+   *
+   * Only mappedParameters and conditions are considered. Regular parameters are
+   * considered not to affect filesystem location
+   */
+  std::vector<std::string> dimensionsForFilesystem();
+
+  void sweep(Processor &processor, std::vector<std::string> dimensions = {},
+             bool recompute = false);
 
   // These should not be modifed by the user (perhaps make private?)
   std::vector<std::shared_ptr<ParameterSpaceDimension>> parameters;
@@ -77,12 +59,27 @@ public:
   // parameters
   std::map<std::string, std::string> parameterNameMap;
 
+  std::function<std::string(std::map<std::string, size_t>)>
+      generateRelativePath = [&](std::map<std::string, size_t> indeces) {
+        std::string path;
+        for (auto dimensionSample : indeces) {
+          auto dimension = getDimension(dimensionSample.first);
+          if (dimension) {
+            auto id = dimension->idAt(dimensionSample.second);
+            path += id + "/";
+          }
+        }
+        return path;
+      };
+
   void loadFromNetCDF(std::string ncFile);
 
   void registerChangeCallback(
       std::function<void(float, ParameterSpaceDimension *)> changeCallback) {
     mChangeCallback = changeCallback;
   }
+
+  std::string rootPath;
 
 protected:
   std::function<void(float, ParameterSpaceDimension *)> mChangeCallback =

@@ -10,6 +10,167 @@ using namespace tinc;
 
 ParameterSpace::ParameterSpace() {}
 
+std::shared_ptr<ParameterSpaceDimension>
+ParameterSpace::getDimension(std::string name) {
+
+  if (parameterNameMap.find(name) != parameterNameMap.end()) {
+    name = parameterNameMap[name];
+  }
+  for (auto ps : parameters) {
+    if (ps->parameter().getName() == name) {
+      return ps;
+    }
+  }
+  for (auto ps : mappedParameters) {
+    if (ps->parameter().getName() == name) {
+      return ps;
+    }
+  }
+  for (auto ps : conditionParameters) {
+    if (ps->parameter().getName() == name) {
+      return ps;
+    }
+  }
+  return nullptr;
+}
+
+void ParameterSpace::registerParameter(
+    std::shared_ptr<ParameterSpaceDimension> dimension) {
+  parameters.push_back(dimension);
+  dimension->parameter().registerChangeCallback([dimension, this](float value) {
+    std::cout << value << dimension->getName() << std::endl;
+    mChangeCallback(value, dimension.get());
+  });
+}
+
+void ParameterSpace::registerMappedParameter(
+    std::shared_ptr<ParameterSpaceDimension> dimension) {
+  mappedParameters.push_back(dimension);
+  dimension->parameter().registerChangeCallback([dimension, this](float value) {
+    std::cout << value << dimension->getName() << std::endl;
+    this->mChangeCallback(value, dimension.get());
+  });
+}
+
+void ParameterSpace::registerCondition(
+    std::shared_ptr<ParameterSpaceDimension> dimension) {
+  conditionParameters.push_back(dimension);
+  dimension->parameter().registerChangeCallback([dimension, this](float value) {
+    std::cout << value << dimension->getName() << std::endl;
+    this->mChangeCallback(value, dimension.get());
+  });
+}
+
+std::vector<std::string> ParameterSpace::paths() {
+  std::vector<std::string> paths;
+  auto dimensionNames = dimensionsForFilesystem();
+
+  std::map<std::string, size_t> currentIndeces;
+  for (auto dimension : dimensionNames) {
+    currentIndeces[dimension] = 0;
+  }
+  bool done = false;
+  while (!done) {
+    done = true;
+    auto path = rootPath + generateRelativePath(currentIndeces);
+    if (path.size() > 0) {
+      paths.push_back(path);
+    }
+    for (auto dimensionName : dimensionNames) {
+      auto dimension = getDimension(dimensionName);
+      currentIndeces[dimensionName]++;
+      if (currentIndeces[dimensionName] == dimension->size()) {
+        currentIndeces[dimensionName] = 0;
+      } else {
+        done = false;
+        break;
+      }
+    }
+  }
+  return paths;
+}
+
+std::vector<std::string> ParameterSpace::dimensions() {
+  std::vector<std::string> dimensions;
+  for (auto ps : parameters) {
+    dimensions.push_back(ps->parameter().getName());
+  }
+  for (auto ps : mappedParameters) {
+    dimensions.push_back(ps->parameter().getName());
+  }
+  for (auto ps : conditionParameters) {
+    dimensions.push_back(ps->parameter().getName());
+  }
+  return dimensions;
+}
+
+std::vector<std::string> ParameterSpace::dimensionsForFilesystem() {
+  std::vector<std::string> dimensions;
+  for (auto ps : mappedParameters) {
+    dimensions.push_back(ps->parameter().getName());
+  }
+  for (auto ps : conditionParameters) {
+    dimensions.push_back(ps->parameter().getName());
+  }
+  return dimensions;
+}
+
+void ParameterSpace::sweep(Processor &processor,
+                           std::vector<std::string> dimensionNames,
+                           bool recompute) {
+
+  if (dimensionNames.size() == 0) {
+    dimensionNames = dimensions();
+  }
+  std::map<std::string, size_t> currentIndeces;
+  for (auto dimensionName : dimensionNames) {
+    if (getDimension(dimensionName)) {
+      currentIndeces[dimensionName] = 0;
+    } else {
+      std::cerr << __FUNCTION__
+                << " ERROR: dimension not found: " << dimensionName
+                << std::endl;
+    }
+  }
+  bool done = false;
+  while (!done) {
+    auto path = rootPath + generateRelativePath(currentIndeces);
+    if (path.size() > 0) {
+      // TODO allow fine grained options of what directory to set
+      processor.setDirectory(path);
+    }
+    for (auto ps : parameters) {
+      processor.configuration[ps->getName()] =
+          ps->at(currentIndeces[ps->getName()]);
+    }
+    for (auto ps : mappedParameters) {
+      processor.configuration[ps->getName()] =
+          ps->idAt(currentIndeces[ps->getName()]);
+    }
+    for (auto ps : conditionParameters) {
+      assert(currentIndeces[ps->getName()] <
+             std::numeric_limits<int64_t>::max());
+      processor.configuration[ps->getName()] =
+          (int64_t)currentIndeces[ps->getName()];
+    }
+    if (!processor.process(recompute) && !processor.ignoreFail) {
+      return;
+    }
+    done = true;
+    for (auto dimensionName : dimensionNames) {
+      auto dimension = getDimension(dimensionName);
+      currentIndeces[dimensionName]++;
+      if (currentIndeces[dimensionName] == dimension->size()) {
+
+        currentIndeces[dimensionName] = 0;
+      } else {
+        done = false;
+        break;
+      }
+    }
+  }
+}
+
 void ParameterSpace::loadFromNetCDF(std::string ncFile) {
 #ifdef TINC_HAS_NETCDF
   conditionParameters.clear();

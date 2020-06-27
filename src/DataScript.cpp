@@ -33,29 +33,6 @@ using namespace tinc;
 
 constexpr auto DATASCRIPT_META_FORMAT_VERSION = 0;
 
-std::mutex PushDirectory::mDirectoryLock;
-
-PushDirectory::PushDirectory(std::string directory, bool verbose)
-    : mVerbose(verbose) {
-  mDirectoryLock.lock();
-  getcwd(previousDirectory, 512);
-  chdir(directory.c_str());
-  if (mVerbose) {
-    std::cout << "Pushing directory: " << directory << std::endl;
-  }
-}
-
-PushDirectory::~PushDirectory() {
-  chdir(previousDirectory);
-  if (mVerbose) {
-    std::cout << "Setting directory back to: " << previousDirectory
-              << std::endl;
-  }
-  mDirectoryLock.unlock();
-}
-
-// --------------------------------------------------
-
 std::string DataScript::scriptFile(bool fullPath) { return mScriptName; }
 
 std::string DataScript::inputFile(bool fullPath, int index) {
@@ -322,6 +299,7 @@ bool DataScript::runCommand(const std::string &command) {
   }
   std::array<char, 128> buffer{0};
   std::string output;
+  // FIXME fork if running async
   FILE *pipe = popen(command.c_str(), "r");
   if (!pipe)
     throw std::runtime_error("popen() failed!");

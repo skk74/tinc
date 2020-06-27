@@ -4,7 +4,46 @@
 
 #include <iostream>
 
+// For PushDirectory
+#if defined(AL_OSX) || defined(AL_LINUX) || defined(AL_EMSCRIPTEN)
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#elif defined(AL_WINDOWS)
+#include <Windows.h>
+#include <direct.h> // for _chdir() and _getcwd()
+#define chdir _chdir
+#define getcwd _getcwd
+
+#define popen _popen
+#define pclose _pclose
+#include <fileapi.h>
+#endif
+
 using namespace tinc;
+
+std::mutex PushDirectory::mDirectoryLock;
+
+PushDirectory::PushDirectory(std::string directory, bool verbose)
+    : mVerbose(verbose) {
+  mDirectoryLock.lock();
+  getcwd(previousDirectory, 512);
+  chdir(directory.c_str());
+  if (mVerbose) {
+    std::cout << "Pushing directory: " << directory << std::endl;
+  }
+}
+
+PushDirectory::~PushDirectory() {
+  chdir(previousDirectory);
+  if (mVerbose) {
+    std::cout << "Setting directory back to: " << previousDirectory
+              << std::endl;
+  }
+  mDirectoryLock.unlock();
+}
+
+// --------------------------------------------------
 
 void Processor::setDirectory(std::string directory) {
   setOutputDirectory(directory);

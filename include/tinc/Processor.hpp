@@ -8,6 +8,20 @@
 
 namespace tinc {
 
+// TODO move PushDirectory to allolib? Or its own file?
+class PushDirectory {
+public:
+  PushDirectory(std::string directory, bool verbose = false);
+
+  ~PushDirectory();
+
+private:
+  char previousDirectory[512];
+  bool mVerbose;
+
+  static std::mutex mDirectoryLock; // Protects all instances of PushDirectory
+};
+
 enum FlagType {
   FLAG_INT = 0,
   FLAG_DOUBLE, // The script to be run
@@ -135,6 +149,8 @@ public:
     mDoneCallbacks.push_back(func);
   }
 
+  void verbose(bool verbose = true) { mVerbose = verbose; }
+
   std::string id;
   bool ignoreFail{false}; ///< If set to true, processor chains will continue
                           ///< even if this processor fails. Has no effect if
@@ -172,6 +188,7 @@ protected:
   std::string mInputDirectory;
   std::vector<std::string> mOutputFileNames;
   std::vector<std::string> mInputFileNames;
+  bool mVerbose;
 
   std::vector<al::ParameterMeta *> mParameters;
 

@@ -7,7 +7,7 @@ using namespace tinc;
 
 struct MyApp : public App {
 
-  NetCDFDiskBufferDouble buffer{"NetCDFBuffer", "test.cdf"};
+  NetCDFDiskBufferDouble buffer{"NetCDFBuffer", "test.nc"};
   VAOMesh m;
 
   void onInit() override {
