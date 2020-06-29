@@ -63,7 +63,19 @@ public:
       generateRelativePath = [&](std::map<std::string, size_t> indeces) {
         std::string path;
         for (auto dimensionSample : indeces) {
-          auto dimension = getDimension(dimensionSample.first);
+          std::shared_ptr<ParameterSpaceDimension> dimension;
+          for (auto ps : mappedParameters) {
+            if (ps->parameter().getName() == dimensionSample.first) {
+              dimension = ps;
+              break;
+            }
+          }
+          for (auto ps : conditionParameters) {
+            if (ps->parameter().getName() == dimensionSample.first) {
+              dimension = ps;
+              break;
+            }
+          }
           if (dimension) {
             auto id = dimension->idAt(dimensionSample.second);
             path += id + "/";
