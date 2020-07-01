@@ -16,6 +16,8 @@ class ParameterSpace {
 public:
   ParameterSpace();
 
+  ~ParameterSpace();
+
   std::shared_ptr<ParameterSpaceDimension> getDimension(std::string name);
 
   void registerParameter(std::shared_ptr<ParameterSpaceDimension> dimension);
@@ -129,7 +131,7 @@ public:
       onSweepProcess;
 
 protected:
-  std::function<void(float value, ParameterSpaceDimension *changedDimension)>
+  std::function<void(float newValue, ParameterSpaceDimension *changedDimension)>
       mChangeCallback = [](float, ParameterSpaceDimension *) {};
 
   std::unique_ptr<std::thread> mAsyncProcessingThread;

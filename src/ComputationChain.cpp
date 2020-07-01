@@ -26,11 +26,11 @@ bool ComputationChain::process(bool forceRecompute) {
     return true;
   }
 
+  std::unique_lock<std::mutex> lk(mChainLock);
   if (prepareFunction && !prepareFunction()) {
     std::cerr << "ERROR preparing processor: " << id << std::endl;
     return false;
   }
-  std::unique_lock<std::mutex> lk(mChainLock);
   bool ret = true;
   bool thisRet = true;
   switch (mType) {

@@ -56,7 +56,7 @@ void Processor::setOutputDirectory(std::string outputDirectory) {
   std::replace(mOutputDirectory.begin(), mOutputDirectory.end(), '\\', '/');
   if (!al::File::isDirectory(mOutputDirectory)) {
     if (!al::Dir::make(mOutputDirectory)) {
-      std::cout << "Unable to create cache directory:" << mOutputDirectory
+      std::cout << "Unable to create output directory:" << mOutputDirectory
                 << std::endl;
     }
   }

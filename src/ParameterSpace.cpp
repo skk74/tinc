@@ -12,6 +12,8 @@ using namespace tinc;
 
 ParameterSpace::ParameterSpace() {}
 
+ParameterSpace::~ParameterSpace() { stopSweep(); }
+
 std::shared_ptr<ParameterSpaceDimension>
 ParameterSpace::getDimension(std::string name) {
 
@@ -41,8 +43,6 @@ void ParameterSpace::registerParameter(
   parameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
     //    std::cout << value << dimension->getName() << std::endl;
-    // Ensure Callback gets changed value
-    dimension->parameter().setNoCalls(value);
     mChangeCallback(value, dimension.get());
   });
 }
@@ -52,8 +52,6 @@ void ParameterSpace::registerMappedParameter(
   mappedParameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
     //    std::cout << value << dimension->getName() << std::endl;
-    // Ensure Callback gets changed value
-    dimension->parameter().setNoCalls(value);
     this->mChangeCallback(value, dimension.get());
   });
 }
@@ -63,8 +61,6 @@ void ParameterSpace::registerCondition(
   conditionParameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
     //    std::cout << value << dimension->getName() << std::endl;
-    // Ensure Callback gets changed value
-    dimension->parameter().setNoCalls(value);
     this->mChangeCallback(value, dimension.get());
   });
 }
@@ -138,7 +134,7 @@ void ParameterSpace::sweep(Processor &processor,
                            std::vector<std::string> dimensionNames,
                            bool recompute) {
   uint64_t sweepCount = 0;
-  uint64_t sweepTotal = 0;
+  uint64_t sweepTotal = 1;
   mSweepRunning = true;
   if (dimensionNames.size() == 0) {
     dimensionNames = dimensions();
@@ -147,7 +143,7 @@ void ParameterSpace::sweep(Processor &processor,
   for (auto dimensionName : dimensionNames) {
     if (getDimension(dimensionName)) {
       currentIndeces[dimensionName] = 0;
-      sweepTotal += getDimension(dimensionName)->size();
+      sweepTotal *= getDimension(dimensionName)->size();
     } else {
       std::cerr << __FUNCTION__
                 << " ERROR: dimension not found: " << dimensionName
