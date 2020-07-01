@@ -13,7 +13,7 @@ set(TINC_SRC
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpaceNode.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Processor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ProcessorAsync.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/ProcessorServer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/TincServer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/VASPReader.cpp
   )
 
@@ -35,7 +35,7 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpaceNode.hpp
     ${TINC_INCLUDE_PATH}/tinc/Processor.hpp
     ${TINC_INCLUDE_PATH}/tinc/ProcessorAsync.hpp
-    ${TINC_INCLUDE_PATH}/tinc/ProcessorServer.hpp
+    ${TINC_INCLUDE_PATH}/tinc/TincServer.hpp
     ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPReader.hpp
 )

@@ -59,14 +59,6 @@ int main() {
   };
 
   ps.rootPath = "data/";
-  auto paths = ps.paths();
-
-  std::cout << " --- Paths ---" << std::endl;
-  for (auto path : paths) {
-    al::Dir::make(path);
-    std::cout << "Directory: " << path << std::endl;
-    al::File::remove(path + processor.getOutputFileNames()[0]);
-  }
 
   // Now sweep the parameter space
   ps.sweep(processor);

@@ -1,4 +1,4 @@
-#include "tinc/ProcessorServer.hpp"
+#include "tinc/TincServer.hpp"
 #include "tinc/ComputationChain.hpp"
 #include "tinc/CppProcessor.hpp"
 #include "tinc/ProcessorAsync.hpp"
@@ -7,9 +7,9 @@
 
 using namespace tinc;
 
-ProcessorServer::ProcessorServer() {}
+TincServer::TincServer() {}
 
-void ProcessorServer::onMessage(al::osc::Message &m) {
+void TincServer::onMessage(al::osc::Message &m) {
 
   if (m.addressPattern().substr(0, sizeof("/computationChains") - 1) ==
       "/computationChains") {
@@ -139,7 +139,17 @@ void ProcessorServer::onMessage(al::osc::Message &m) {
       std::cerr << "Unexpected syntax for /computationChains" << std::endl;
       m.print();
     }
+    return;
+  }
 
+  if (m.addressPattern().substr(0, sizeof("/parameterSpaces") - 1) ==
+      "/parameterSpaces") {
+    if (m.typeTags()[0] == 'i') {
+      int port;
+      m >> port;
+      for (auto *ps : mParameterSpaces) {
+      }
+    }
     return;
   }
 }

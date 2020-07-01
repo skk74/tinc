@@ -1,5 +1,7 @@
 #include "tinc/ParameterSpace.hpp"
 
+#include "al/io/al_File.hpp"
+
 #ifdef TINC_HAS_HDF5
 #include <netcdf.h>
 #endif
@@ -38,7 +40,9 @@ void ParameterSpace::registerParameter(
     std::shared_ptr<ParameterSpaceDimension> dimension) {
   parameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
-    std::cout << value << dimension->getName() << std::endl;
+    //    std::cout << value << dimension->getName() << std::endl;
+    // Ensure Callback gets changed value
+    dimension->parameter().setNoCalls(value);
     mChangeCallback(value, dimension.get());
   });
 }
@@ -47,7 +51,9 @@ void ParameterSpace::registerMappedParameter(
     std::shared_ptr<ParameterSpaceDimension> dimension) {
   mappedParameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
-    std::cout << value << dimension->getName() << std::endl;
+    //    std::cout << value << dimension->getName() << std::endl;
+    // Ensure Callback gets changed value
+    dimension->parameter().setNoCalls(value);
     this->mChangeCallback(value, dimension.get());
   });
 }
@@ -56,7 +62,9 @@ void ParameterSpace::registerCondition(
     std::shared_ptr<ParameterSpaceDimension> dimension) {
   conditionParameters.push_back(dimension);
   dimension->parameter().registerChangeCallback([dimension, this](float value) {
-    std::cout << value << dimension->getName() << std::endl;
+    //    std::cout << value << dimension->getName() << std::endl;
+    // Ensure Callback gets changed value
+    dimension->parameter().setNoCalls(value);
     this->mChangeCallback(value, dimension.get());
   });
 }
@@ -90,6 +98,17 @@ std::vector<std::string> ParameterSpace::paths() {
   return paths;
 }
 
+std::string ParameterSpace::currentPath() {
+  std::map<std::string, size_t> indeces;
+  for (auto ps : mappedParameters) {
+    indeces[ps->getName()] = ps->getCurrentIndex();
+  }
+  for (auto ps : conditionParameters) {
+    indeces[ps->getName()] = ps->getCurrentIndex();
+  }
+  return al::File::conformDirectory(generateRelativePath(indeces));
+}
+
 std::vector<std::string> ParameterSpace::dimensions() {
   std::vector<std::string> dimensions;
   for (auto ps : parameters) {
@@ -118,7 +137,9 @@ std::vector<std::string> ParameterSpace::dimensionsForFilesystem() {
 void ParameterSpace::sweep(Processor &processor,
                            std::vector<std::string> dimensionNames,
                            bool recompute) {
-
+  uint64_t sweepCount = 0;
+  uint64_t sweepTotal = 0;
+  mSweepRunning = true;
   if (dimensionNames.size() == 0) {
     dimensionNames = dimensions();
   }
@@ -126,6 +147,7 @@ void ParameterSpace::sweep(Processor &processor,
   for (auto dimensionName : dimensionNames) {
     if (getDimension(dimensionName)) {
       currentIndeces[dimensionName] = 0;
+      sweepTotal += getDimension(dimensionName)->size();
     } else {
       std::cerr << __FUNCTION__
                 << " ERROR: dimension not found: " << dimensionName
@@ -133,12 +155,7 @@ void ParameterSpace::sweep(Processor &processor,
     }
   }
   bool done = false;
-  while (!done) {
-    auto path = rootPath + generateRelativePath(currentIndeces);
-    if (path.size() > 0) {
-      // TODO allow fine grained options of what directory to set
-      processor.setDirectory(path);
-    }
+  while (!done && mSweepRunning) {
     for (auto ps : parameters) {
       processor.configuration[ps->getName()] =
           ps->at(currentIndeces[ps->getName()]);
@@ -153,14 +170,23 @@ void ParameterSpace::sweep(Processor &processor,
       processor.configuration[ps->getName()] =
           (int64_t)currentIndeces[ps->getName()];
     }
+    auto path = rootPath + generateRelativePath(currentIndeces);
+    if (path.size() > 0) {
+      // TODO allow fine grained options of what directory to set
+      processor.setDirectory(path);
+    }
     if (!processor.process(recompute) && !processor.ignoreFail) {
       return;
+    }
+    sweepCount++;
+    if (onSweepProcess) {
+      onSweepProcess(currentIndeces, sweepCount / (double)sweepTotal);
     }
     done = true;
     for (auto dimensionName : dimensionNames) {
       auto dimension = getDimension(dimensionName);
       currentIndeces[dimensionName]++;
-      if (currentIndeces[dimensionName] == dimension->size()) {
+      if (currentIndeces[dimensionName] >= dimension->size()) {
 
         currentIndeces[dimensionName] = 0;
       } else {
@@ -169,6 +195,28 @@ void ParameterSpace::sweep(Processor &processor,
       }
     }
   }
+  mSweepRunning = false;
+}
+
+void ParameterSpace::sweepAsync(Processor &processor,
+                                std::vector<std::string> dimensions,
+                                bool recompute) {
+
+  mAsyncProcessingThread = std::make_unique<std::thread>([=, &processor]() {
+    //
+    this->sweep(processor, dimensions, recompute);
+  });
+}
+
+bool ParameterSpace::createDataDirectories() {
+  for (auto path : paths()) {
+    if (!al::File::isDirectory(path)) {
+      if (!al::Dir::make(path)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 void ParameterSpace::loadFromNetCDF(std::string ncFile) {

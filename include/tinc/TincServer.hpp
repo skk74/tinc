@@ -1,16 +1,17 @@
-#ifndef PROCESSSERVER_HPP
-#define PROCESSSERVER_HPP
+#ifndef TINCSERVER_HPP
+#define TINCSERVER_HPP
 
 #include "al/protocol/al_OSC.hpp"
 #include "al/ui/al_ParameterServer.hpp"
 
+#include "tinc/ParameterSpace.hpp"
 #include "tinc/Processor.hpp"
 
 namespace tinc {
 
-class ProcessorServer : public al::osc::PacketHandler {
+class TincServer : public al::osc::PacketHandler {
 public:
-  ProcessorServer();
+  TincServer();
 
   void exposeToNetwork(al::ParameterServer &pserver) {
     pserver.appendCommandHandler(*this);
@@ -20,8 +21,17 @@ public:
     mProcessors.push_back(&processor);
   }
 
-  ProcessorServer &operator<<(Processor &p) {
+  void registerParameterSpace(ParameterSpace &ps) {
+    mParameterSpaces.push_back(&ps);
+  }
+
+  TincServer &operator<<(Processor &p) {
     registerProcessor(p);
+    return *this;
+  }
+
+  TincServer &operator<<(ParameterSpace &p) {
+    registerParameterSpace(p);
     return *this;
   }
 
@@ -29,8 +39,9 @@ public:
 
 protected:
   std::vector<Processor *> mProcessors;
+  std::vector<ParameterSpace *> mParameterSpaces;
 };
 
 } // namespace tinc
 
-#endif // PROCESSSERVER_HPP
+#endif // TINCSERVER_HPP

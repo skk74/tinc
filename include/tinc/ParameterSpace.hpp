@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace tinc {
@@ -30,6 +31,14 @@ public:
   std::vector<std::string> paths();
 
   /**
+   * @brief Get relative filesystem path for current parameter values
+   * @return
+   *
+   * Generated according to generateRelativePath()
+   */
+  std::string currentPath();
+
+  /**
    * @brief Returns the names of all dimensions
    */
   std::vector<std::string> dimensions();
@@ -39,13 +48,32 @@ public:
    * directories
    * @return
    *
-   * Only mappedParameters and conditions are considered. Regular parameters are
-   * considered not to affect filesystem location
+   * Only mappedParameters and conditions are considered. Regular parameters
+   * are considered not to affect filesystem location
    */
   std::vector<std::string> dimensionsForFilesystem();
 
   void sweep(Processor &processor, std::vector<std::string> dimensions = {},
              bool recompute = false);
+
+  void sweepAsync(Processor &processor,
+                  std::vector<std::string> dimensions = {},
+                  bool recompute = false);
+
+  /**
+   * @brief Create necessary filesystem directories to be populated by data
+   * @return true if successfully created (or checked existence) of
+   * directories.
+   */
+  bool createDataDirectories();
+
+  void stopSweep() {
+    mSweepRunning = false;
+    if (mAsyncProcessingThread) {
+      mAsyncProcessingThread->join();
+      mAsyncProcessingThread = nullptr;
+    }
+  }
 
   // These should not be modifed by the user (perhaps make private?)
   std::vector<std::shared_ptr<ParameterSpaceDimension>> parameters;
@@ -59,6 +87,9 @@ public:
   // parameters
   std::map<std::string, std::string> parameterNameMap;
 
+  // FIXME this interface is a little uncomfortable and not consistent with
+  // the other similar functionality in setOuputFilename(), perhaps an output
+  // filename generator function should be provided?
   std::function<std::string(std::map<std::string, size_t>)>
       generateRelativePath = [&](std::map<std::string, size_t> indeces) {
         std::string path;
@@ -93,9 +124,17 @@ public:
 
   std::string rootPath;
 
+  std::function<void(std::map<std::string, size_t> currentIndeces,
+                     double progress)>
+      onSweepProcess;
+
 protected:
-  std::function<void(float, ParameterSpaceDimension *)> mChangeCallback =
-      [](float, ParameterSpaceDimension *) {};
+  std::function<void(float value, ParameterSpaceDimension *changedDimension)>
+      mChangeCallback = [](float, ParameterSpaceDimension *) {};
+
+  std::unique_ptr<std::thread> mAsyncProcessingThread;
+
+  bool mSweepRunning{false};
 
 private:
 };
