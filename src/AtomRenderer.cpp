@@ -74,7 +74,7 @@ void AtomRenderer::setDataBoundaries(al::BoundingBoxData &b) {
 void AtomRenderer::draw(al::Graphics &g, float scale,
                         std::map<std::string, AtomData> &mAtomData,
                         std::vector<float> &mAligned4fData) {
-  gl::polygonFill();
+  g.polygonFill();
   // now draw data with custom shaderg.shader(instancing_mesh0.shader);
   g.shader(instancingMesh.shader);
   g.shader().uniform("layerSeparation", mLayerSeparation);
@@ -108,14 +108,14 @@ void AtomRenderer::renderInstances(Graphics &g, float scale,
                                count);
     cumulativeCount += count;
 
-    gl::polygonFill();
+    g.polygonFill();
     g.shader().uniform("is_line", 0.0f);
     instancingMesh.draw();
 
     g.shader().uniform("is_line", 1.0f);
-    gl::polygonLine();
+    g.polygonLine();
     instancingMesh.draw();
-    gl::polygonFill();
+    g.polygonFill();
   }
 }
 
