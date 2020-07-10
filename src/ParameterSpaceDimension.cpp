@@ -122,6 +122,11 @@ size_t ParameterSpaceDimension::getCurrentIndex() {
   return getIndexForValue(mParameterValue.get());
 }
 
+void ParameterSpaceDimension::setCurrentIndex(size_t index) {
+
+  parameter().set(at(index));
+}
+
 std::string ParameterSpaceDimension::getCurrentId() {
   return idAt(getCurrentIndex());
 }
@@ -265,7 +270,7 @@ void ParameterSpaceDimension::append(float *values, size_t count,
   }
 }
 
-void ParameterSpaceDimension::append(int *values, size_t count,
+void ParameterSpaceDimension::append(int32_t *values, size_t count,
                                      std::string idprefix) {
   size_t oldSize = mValues.size();
   mValues.resize(mValues.size() + count);
@@ -287,6 +292,27 @@ void ParameterSpaceDimension::append(int *values, size_t count,
 }
 
 void ParameterSpaceDimension::append(uint32_t *values, size_t count,
+                                     std::string idprefix) {
+  size_t oldSize = mValues.size();
+  mValues.resize(mValues.size() + count);
+  auto valueIt = mValues.begin() + oldSize;
+  auto idIt = mIds.begin() + oldSize;
+  bool useIds = false;
+  if (mIds.size() > 0 || idprefix.size() > 0) {
+    useIds = true;
+  }
+  for (size_t i = 0; i < count; i++) {
+    if (useIds) {
+      *idIt = idprefix + std::to_string(*values);
+      idIt++;
+    }
+    *valueIt = *values;
+    values++;
+    valueIt++;
+  }
+}
+
+void ParameterSpaceDimension::append(uint8_t *values, size_t count,
                                      std::string idprefix) {
   size_t oldSize = mValues.size();
   mValues.resize(mValues.size() + count);

@@ -30,6 +30,10 @@ class ParameterSpaceDimension {
   friend class ParameterSpace;
 
 public:
+  typedef enum { FLOAT, UINT8, INT32, UINT32 } Datatype;
+
+  typedef enum { INTERNAL, INDEX, MAPPED } DimensionType;
+
   ParameterSpaceDimension(std::string name, std::string group = "")
       : mParameterValue(name, group) {}
   std::string getName();
@@ -39,6 +43,7 @@ public:
   void setCurrentValue(float value);
 
   size_t getCurrentIndex();
+  void setCurrentIndex(size_t index);
   std::string getCurrentId();
 
   // Multidimensional parameter spaces will result in single values having
@@ -59,6 +64,8 @@ public:
 
   std::string idAt(size_t x);
   size_t getIndexForValue(float value);
+
+  // FIXME Are these getAll still relevant?
   std::vector<std::string> getAllIds(float value);
   std::vector<size_t> getAllIndeces(float value);
 
@@ -89,8 +96,9 @@ public:
   void push_back(float value, std::string id = "");
 
   void append(float *values, size_t count, std::string idprefix = "");
-  void append(int *values, size_t count, std::string idprefix = "");
+  void append(int32_t *values, size_t count, std::string idprefix = "");
   void append(uint32_t *values, size_t count, std::string idprefix = "");
+  void append(uint8_t *values, size_t count, std::string idprefix = "");
 
   // Set limits from internal data
   void conform();
@@ -101,6 +109,9 @@ public:
   // TODO all readers above need to use this lock
   void lock() { mLock.lock(); }
   void unlock() { mLock.unlock(); }
+
+  Datatype datatype{FLOAT};
+  DimensionType type{INTERNAL};
 
 private:
   // Data

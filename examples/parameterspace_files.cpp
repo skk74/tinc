@@ -38,33 +38,30 @@ int main() {
   ps.registerDimension(dimension2);
   ps.registerDimension(inner_param);
 
-  tinc::CppProcessor processor;
+  if (!ps.writeToNetCDF()) {
+    std::cerr << "Error writing NetCDF file" << std::endl;
+  }
 
-  processor.setOutputFileNames({"output.txt"});
+  // Now load the parameter space from disk
+  tinc::ParameterSpace ps2;
 
-  processor.processingFunction = [&]() {
-    std::string text =
-        processor.configuration["dim1"].flagValueStr + " -- " +
-        std::to_string(processor.configuration["dim2"].flagValueInt) + " -- " +
-        std::to_string(processor.configuration["inner_param"].flagValueDouble);
+  ps2.readFromNetCDF();
 
-    std::cout << "Writing: "
-              << processor.runningDirectory() +
-                     processor.getOutputFileNames()[0]
-              << std::endl;
-    std::ofstream f(processor.runningDirectory() +
-                        processor.getOutputFileNames()[0],
-                    std::ofstream::app);
-    f << text << std::endl;
-    f.close();
+  for (auto dimensionName : ps2.dimensionNames()) {
+    std::cout << " ---- Dimension: " << dimensionName << std::endl;
+    auto dim = ps2.getDimension(dimensionName);
 
-    return true;
-  };
-
-  ps.rootPath = "data/";
-
-  // Now sweep the parameter space
-  ps.sweep(processor);
+    std::cout << "  Values: " << std::endl;
+    for (auto value : dim->values()) {
+      std::cout << value << std::endl;
+    }
+    if (dim->ids().size() > 0) {
+      std::cout << "  Ids: " << std::endl;
+      for (auto id : dim->ids()) {
+        std::cout << id << std::endl;
+      }
+    }
+  }
 
   return 0;
 }
