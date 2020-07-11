@@ -45,10 +45,10 @@ PushDirectory::~PushDirectory() {
 
 // --------------------------------------------------
 
-void Processor::setDirectory(std::string directory) {
+void Processor::setDataDirectory(std::string directory) {
   setOutputDirectory(directory);
   setInputDirectory(directory);
-  setRunningDirectory(directory);
+  //  setRunningDirectory(directory);
 }
 
 void Processor::setOutputDirectory(std::string outputDirectory) {

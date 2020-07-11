@@ -99,7 +99,7 @@ public:
   /**
    * @brief Convenience function to set input, output and running directory
    */
-  void setDirectory(std::string directory);
+  void setDataDirectory(std::string directory);
 
   /**
    * @brief Set the directory for output files

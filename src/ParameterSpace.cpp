@@ -168,7 +168,7 @@ void ParameterSpace::sweep(Processor &processor,
                 generateRelativePath(currentIndeces);
     if (path.size() > 0) {
       // TODO allow fine grained options of what directory to set
-      processor.setDirectory(path);
+      processor.setDataDirectory(path);
     }
     if (!processor.process(recompute) && !processor.ignoreFail) {
       return;

@@ -28,23 +28,23 @@ struct MyApp : public App {
         std::make_shared<tinc::ParameterSpaceDimension>("inner_param");
 
     // Create large parameter space
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < 20; i++) {
       dimension1->push_back(i, "L_" + std::to_string(i));
     }
     dimension1->conform();
     dimension1->type = tinc::ParameterSpaceDimension::MAPPED;
 
-    for (int i = 0; i < 220; i++) {
+    for (int i = 0; i < 22; i++) {
       dimension2->push_back(i / 220.0);
     }
     dimension2->conform();
     dimension2->type = tinc::ParameterSpaceDimension::INDEX;
 
-    for (int i = 0; i < 230; i++) {
+    for (int i = 0; i < 23; i++) {
       inner_param->push_back(10 + i);
     }
     inner_param->conform();
-    dimension1->type = tinc::ParameterSpaceDimension::INTERNAL;
+    inner_param->type = tinc::ParameterSpaceDimension::INTERNAL;
 
     ps.registerDimension(dimension1);
     ps.registerDimension(dimension2);
@@ -66,9 +66,8 @@ struct MyApp : public App {
     ps.registerChangeCallback(
         [&](float /*value*/, ParameterSpaceDimension * /*changedDimension*/) {
           std::string name =
-              "out_" + ps.getDimension("dim1")->getCurrentId() + " -- " +
-              std::to_string(ps.getDimension("dim2")->getCurrentIndex()) +
-              " -- " +
+              "out_" + ps.getDimension("dim1")->getCurrentId() + "_" +
+              std::to_string(ps.getDimension("dim2")->getCurrentIndex()) + "_" +
               std::to_string(
                   ps.getDimension("inner_param")->getCurrentValue()) +
               ".txt";
@@ -91,9 +90,8 @@ struct MyApp : public App {
 
     processor.prepareFunction = [&]() {
       std::string name =
-          "out_" + processor.configuration["dim1"].flagValueStr + " -- " +
-          std::to_string(processor.configuration["dim2"].flagValueInt) +
-          " -- " +
+          "out_" + processor.configuration["dim1"].flagValueStr + "_" +
+          std::to_string(processor.configuration["dim2"].flagValueInt) + "_" +
           std::to_string(
               processor.configuration["inner_param"].flagValueDouble) +
           ".txt";
@@ -103,15 +101,22 @@ struct MyApp : public App {
 
     // processing function takes longer than one second
     processor.processingFunction = [&]() {
-      std::string text = std::to_string(
-          processor.configuration["dim2"].flagValueInt +
-          processor.configuration["inner_param"].flagValueDouble);
+      std::string text =
+          processor.configuration["dim1"].flagValueStr + " -- " +
+          std::to_string(processor.configuration["dim2"].flagValueInt) +
+          " -- " +
+          std::to_string(
+              processor.configuration["inner_param"].flagValueDouble);
 
-      std::ofstream f(processor.runningDirectory() +
+      std::ofstream f(processor.outputDirectory() +
                       processor.getOutputFileNames()[0]);
       f << text << std::endl;
       f.close();
-      al_sleep(1.0);
+      std::cout << "Wrote "
+                << processor.outputDirectory() +
+                       processor.getOutputFileNames()[0]
+                << std::endl;
+      al_sleep(0.5);
       return true;
     };
   }
