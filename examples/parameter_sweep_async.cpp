@@ -50,7 +50,7 @@ struct MyApp : public App {
     ps.registerDimension(dimension2);
     ps.registerDimension(inner_param);
 
-    ps.generateRelativePath = [&](std::map<std::string, size_t> indeces) {
+    ps.generateRelativeRunPath = [&](std::map<std::string, size_t> indeces) {
       return "asyncdata/";
     };
     // Create necessary filesystem directories to be populated by data
@@ -71,7 +71,7 @@ struct MyApp : public App {
               std::to_string(
                   ps.getDimension("inner_param")->getCurrentValue()) +
               ".txt";
-          std::ifstream f(ps.currentPath() + name);
+          std::ifstream f(ps.currentRunPath() + name);
           if (f.is_open()) {
             f.seekg(0, std::ios::end);
             displayText.reserve(f.tellg());

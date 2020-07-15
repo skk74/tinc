@@ -7,12 +7,12 @@ set(TINC_SRC
     ${CMAKE_CURRENT_LIST_DIR}/src/AtomRenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ComputationChain.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/CppProcessor.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/DataScript.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpaceDimension.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ParameterSpaceNode.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Processor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ProcessorAsync.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ScriptProcessor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TincServer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/VASPReader.cpp
   )
@@ -24,7 +24,6 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/BufferManager.hpp
     ${TINC_INCLUDE_PATH}/tinc/ComputationChain.hpp
     ${TINC_INCLUDE_PATH}/tinc/CppProcessor.hpp
-    ${TINC_INCLUDE_PATH}/tinc/DataScript.hpp
     ${TINC_INCLUDE_PATH}/tinc/DeferredComputation.hpp
     ${TINC_INCLUDE_PATH}/tinc/DiskBuffer.hpp
     ${TINC_INCLUDE_PATH}/tinc/ImageDiskBuffer.hpp
@@ -33,10 +32,11 @@ set(TINC_HEADERS
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpace.hpp
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpaceDimension.hpp
     ${TINC_INCLUDE_PATH}/tinc/ParameterSpaceNode.hpp
+    ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/Processor.hpp
     ${TINC_INCLUDE_PATH}/tinc/ProcessorAsync.hpp
+    ${TINC_INCLUDE_PATH}/tinc/ScriptProcessor.hpp
     ${TINC_INCLUDE_PATH}/tinc/TincServer.hpp
-    ${TINC_INCLUDE_PATH}/tinc/PeriodicTask.hpp
     ${TINC_INCLUDE_PATH}/tinc/VASPReader.hpp
 )
 

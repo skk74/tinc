@@ -1,8 +1,8 @@
 #ifndef COMPUTATIONCHAIN_HPP
 #define COMPUTATIONCHAIN_HPP
 
-#include "tinc/DataScript.hpp"
 #include "tinc/ProcessorAsync.hpp"
+#include "tinc/ScriptProcessor.hpp"
 
 #include <mutex>
 #include <thread>

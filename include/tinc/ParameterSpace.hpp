@@ -25,7 +25,7 @@ public:
   /**
    * @brief Returns all the paths that are used by the whole parameter space
    */
-  std::vector<std::string> paths();
+  std::vector<std::string> runningPaths();
 
   /**
    * @brief Get relative filesystem path for current parameter values
@@ -33,7 +33,7 @@ public:
    *
    * Generated according to generateRelativePath()
    */
-  std::string currentPath();
+  std::string currentRunPath();
 
   /**
    * @brief Returns the names of all dimensions
@@ -108,7 +108,7 @@ public:
    * @param value
    * @param ps
    */
-  void updateParameterSpace(float value, ParameterSpaceDimension *ps);
+  void updateParameterSpace(float oldValue, ParameterSpaceDimension *ps);
 
   std::string rootPath;
 
@@ -124,7 +124,7 @@ public:
   // the other similar functionality in setOuputFilename(), perhaps an output
   // filename generator function should be provided?
   std::function<std::string(std::map<std::string, size_t>)>
-      generateRelativePath = [&](std::map<std::string, size_t> indeces) {
+      generateRelativeRunPath = [&](std::map<std::string, size_t> indeces) {
         std::string path;
         for (auto dimensionSample : indeces) {
           std::shared_ptr<ParameterSpaceDimension> dimension;
@@ -152,7 +152,7 @@ public:
       std::vector<std::shared_ptr<ParameterSpaceDimension>> &newDimensions);
 
 protected:
-  std::function<void(float newValue, ParameterSpaceDimension *changedDimension)>
+  std::function<void(float oldValue, ParameterSpaceDimension *changedDimension)>
       mChangeCallback = [](float, ParameterSpaceDimension *) {};
 
   std::unique_ptr<std::thread> mAsyncProcessingThread;

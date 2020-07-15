@@ -23,7 +23,7 @@ void TincServer::onMessage(al::osc::Message &m) {
         oscPacket.beginMessage("/registerProcessor");
 
         std::string type;
-        if (strcmp(typeid(*p).name(), typeid(DataScript).name()) == 0) {
+        if (strcmp(typeid(*p).name(), typeid(ScriptProcessor).name()) == 0) {
           type = "DataScript";
         } else if (strcmp(typeid(*p).name(), typeid(ComputationChain).name()) ==
                    0) {
@@ -83,7 +83,7 @@ void TincServer::onMessage(al::osc::Message &m) {
                   dynamic_cast<ProcessorAsync *>(childProcessor)->processor();
             }
             if (strcmp(typeid(*childProcessor).name(),
-                       typeid(DataScript).name()) == 0) {
+                       typeid(ScriptProcessor).name()) == 0) {
               type = "DataScript";
             } else if (strcmp(typeid(*childProcessor).name(),
                               typeid(ComputationChain).name()) == 0) {

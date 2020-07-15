@@ -34,12 +34,12 @@ namespace tinc {
  * In the /home/sweet/home directory.
  *
  */
-class DataScript : public Processor {
+class ScriptProcessor : public Processor {
 public:
   // TODO change constructor to match Processor constructor
-  DataScript(std::string id = "") : Processor(id) {}
+  ScriptProcessor(std::string id = "") : Processor(id) {}
 
-  virtual ~DataScript() { waitForAsyncDone(); }
+  virtual ~ScriptProcessor() { waitForAsyncDone(); }
 
   /**
    * @brief Set the script's main command (e.g. python)
@@ -159,7 +159,7 @@ private:
   std::vector<Processor *> mProcessors;
 };
 
-class ParallelProcessor : public DataScript {
+class ParallelProcessor : public ScriptProcessor {
 public:
   // TODO is this worth finishing?
 

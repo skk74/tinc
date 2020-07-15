@@ -43,8 +43,12 @@ void ParameterSpace::registerDimension(
       dimension->parameter().registerChangeCallback(
           [dimension, this](float value) {
             //    std::cout << value << dimension->getName() << std::endl;
-            this->updateParameterSpace(value, dimension.get());
-            this->mChangeCallback(value, dimension.get());
+            float oldValue = dimension->parameter().get();
+            dimension->parameter().setNoCalls(value);
+
+            this->updateParameterSpace(oldValue, dimension.get());
+            this->mChangeCallback(oldValue, dimension.get());
+            dimension->parameter().setNoCalls(oldValue);
           });
       return;
     }
@@ -57,7 +61,7 @@ void ParameterSpace::registerDimension(
   dimensions.push_back(dimension);
 }
 
-std::vector<std::string> ParameterSpace::paths() {
+std::vector<std::string> ParameterSpace::runningPaths() {
   std::vector<std::string> paths;
   auto dimensionNames = dimensionsForFilesystem();
 
@@ -69,7 +73,7 @@ std::vector<std::string> ParameterSpace::paths() {
   while (!done) {
     done = true;
     auto path = al::File::conformPathToOS(rootPath) +
-                generateRelativePath(currentIndeces);
+                generateRelativeRunPath(currentIndeces);
     if (path.size() > 0) {
       paths.push_back(path);
     }
@@ -78,7 +82,7 @@ std::vector<std::string> ParameterSpace::paths() {
   return paths;
 }
 
-std::string ParameterSpace::currentPath() {
+std::string ParameterSpace::currentRunPath() {
   std::map<std::string, size_t> indeces;
   for (auto ps : dimensions) {
     if (ps->type == ParameterSpaceDimension::MAPPED ||
@@ -86,7 +90,7 @@ std::string ParameterSpace::currentPath() {
       indeces[ps->getName()] = ps->getCurrentIndex();
     }
   }
-  return al::File::conformPathToOS(generateRelativePath(indeces));
+  return al::File::conformPathToOS(generateRelativeRunPath(indeces));
 }
 
 std::vector<std::string> ParameterSpace::dimensionNames() {
@@ -165,10 +169,10 @@ void ParameterSpace::sweep(Processor &processor,
       }
     }
     auto path = al::File::conformPathToOS(rootPath) +
-                generateRelativePath(currentIndeces);
+                generateRelativeRunPath(currentIndeces);
     if (path.size() > 0) {
       // TODO allow fine grained options of what directory to set
-      processor.setDataDirectory(path);
+      processor.setRunningDirectory(path);
     }
     if (!processor.process(recompute) && !processor.ignoreFail) {
       return;
@@ -193,7 +197,7 @@ void ParameterSpace::sweepAsync(Processor &processor,
 }
 
 bool ParameterSpace::createDataDirectories() {
-  for (auto path : paths()) {
+  for (auto path : runningPaths()) {
     if (!al::File::isDirectory(path)) {
       if (!al::Dir::make(path)) {
         return false;
@@ -449,7 +453,7 @@ bool ParameterSpace::readFromNetCDF(std::string ncFile) {
   }
   bool done = false;
   while (!done) {
-    auto path = generateRelativePath(currentIndeces);
+    auto path = generateRelativeRunPath(currentIndeces);
 
     std::stringstream ss(path);
     std::string item;
@@ -721,7 +725,7 @@ void ParameterSpace::registerChangeCallback(
   mChangeCallback = changeCallback;
 }
 
-void ParameterSpace::updateParameterSpace(float value,
+void ParameterSpace::updateParameterSpace(float oldValue,
                                           ParameterSpaceDimension *ps) {
   if (mSpecialDirs.size() == 0) {
     return; // No need to check
@@ -734,13 +738,14 @@ void ParameterSpace::updateParameterSpace(float value,
       indeces[dimension->getName()] = dimension->getCurrentIndex();
       if (dimension.get() == ps) {
         isFileSystemParam = true;
-        indeces[dimension->getName()] = dimension->getIndexForValue(value);
+        indeces[dimension->getName()] =
+            dimension->getIndexForValue(ps->getCurrentValue());
       }
     }
   }
 
   if (isFileSystemParam) {
-    std::string newPath = generateRelativePath(indeces);
+    std::string newPath = generateRelativeRunPath(indeces);
     std::stringstream ss(newPath);
     std::string item;
     std::vector<std::string> newPathComponents;
@@ -748,7 +753,7 @@ void ParameterSpace::updateParameterSpace(float value,
       newPathComponents.push_back(std::move(item));
     }
 
-    auto path = currentPath();
+    auto path = currentRunPath();
     std::stringstream ss2(path);
     std::vector<std::string> oldPathComponents;
     while (std::getline(ss2, item, AL_FILE_DELIMITER)) {
