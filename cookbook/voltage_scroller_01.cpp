@@ -16,12 +16,8 @@ using namespace al;
 using namespace tinc;
 
 /*
- * This file shows using TINC to generate and display a graph that is generated
- * on the fly by a python script. The parameter space is swept from the first
- * run, to generate cache.
- *
- * This demosntrates usage of TINC to generate analysis to a set of directories
- * where each directory is a sample of the parameter space.
+ * This file shows using TINC to create a parameter space and sweep across it
+ * calling a python script to generate data.
  *
  * The process to realize this is:
  * 1) Defining the parameter space (see defineParameterSpace()). Here the 4
@@ -33,31 +29,21 @@ using namespace tinc;
  *
  * 2) Configure the parameter space by defining the function that generates a
  * path from the current values of the parameter space
- * (ParameterSpace::generateRelativeRunPath) and by defining what should happen
- * when the current value of the parameter space changes
- * (ParameterSpace::registerChangeCallback). In this case when the parameter
- * space value changes, the python script is called to generate the plot, and
- * the result is then loaded into the open GL texture that is displayed.
+ * (ParameterSpace::generateRelativeRunPath)
  *
  * 3) Initialize the computation, by setting the command, script name, output
  * name and any other details that need to be configured for the script to run
- * correctly, see initializeComputation(). In this case, the python script has
- * been written to work on the daa contained in each directory, for this reason,
- * on the parameter space change callback there is the line:
- * processor.setRunningDirectory(ps.currentRunPath());
- * That sets the path to be the current one.
+ * correctly, see initializeComputation().
  *
- * The GUI sliders are generated through the convenience class al::ControlGUI,
- * that will display a GUI control for any parameter that is registered with it.
+ * The sweep is realized in onInit() by calling ParameterSpace::sweep(). This
+ * function takes a Processor as argument. This processor will be run for every
+ * sample within the path produced by the generateRelativeRunPath function that
+ * we defined.
  */
 
 struct MyApp : public App {
   ParameterSpace ps;
   ScriptProcessor processor;
-  ControlGUI gui;
-
-  std::string displayText;
-  Texture graphTex;
 
   std::string clean_double_to_string(double value) {
     std::string val_as_string = std::to_string(value);
@@ -125,29 +111,17 @@ struct MyApp : public App {
     // Register callback after every process call in a parameter sweep
     ps.onSweepProcess = [&](std::map<std::string, size_t> currentIndeces,
                             double progress) {
+      std::cout << "Processed: " << ps.generateRelativeRunPath(currentIndeces)
+                << std::endl;
       std::cout << "Progress: " << progress * 100 << "%" << std::endl;
     };
-
-    // Whenever the parameter space point changes, this function is called
-    ps.registerChangeCallback(
-        [&](float value, ParameterSpaceDimension *changedDimension) {
-          processor.setRunningDirectory(ps.currentRunPath());
-          processor.process();
-          Image img(ps.currentRunPath() + processor.getOutputFileNames()[0]);
-          graphTex.resize(img.width(), img.height());
-          graphTex.submit(img.array().data(), GL_RGBA, GL_UNSIGNED_BYTE);
-
-          graphTex.filter(Texture::LINEAR);
-
-          return true;
-        });
   }
 
   void initializeComputation() {
     // set local filename here relative to running directory and output
     // directory
     processor.setCommand("python");
-    processor.setScriptName("../plot_voltage.py");
+    processor.setScriptName("../../plot_voltage.py");
     processor.setOutputFileNames({"voltage_curve.png"});
     // need to assign processor.registerDoneCallback to load image
     //(should be able to use running/output directory to find file)
@@ -157,31 +131,11 @@ struct MyApp : public App {
     defineParameterSpace();
     initializeComputation();
 
-    // GUI sliders
-    gui << ps.getDimension("eci1")->parameter();
-    gui << ps.getDimension("eci2")->parameter();
-    gui << ps.getDimension("eci3")->parameter();
-    gui << ps.getDimension("eci4")->parameter();
-    gui.init();
-
-    // Now sweep the parameter space asynchronously
-    // ps.sweepAsync(processor);
-  }
-  void onCreate() override { graphTex.create2D(512, 512); }
-
-  void onDraw(Graphics &g) override {
-    g.clear(0);
-
-    g.pushMatrix();
-    g.translate(0, 0, -4);
-    g.texture();
-    g.quad(graphTex, -1, 1, 2, -1.5);
-    g.popMatrix();
-
-    gui.draw(g);
+    // Sweep the parameter space running 'processor' on every sample
+    ps.sweep(processor);
   }
 
-  void onExit() override { gui.cleanup(); }
+  void onDraw(Graphics &g) override { g.clear(0); }
 };
 
 int main() {
