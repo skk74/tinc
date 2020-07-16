@@ -391,9 +391,8 @@ al_sec ScriptProcessor::modified(const char *path) const {
 }
 
 bool ScriptProcessor::needsRecompute() {
-
   std::ifstream metaFileStream;
-  metaFileStream.open(metaFilename(), std::ofstream::in);
+  metaFileStream.open(mRunningDirectory + metaFilename(), std::ofstream::in);
 
   if (metaFileStream.fail()) {
     if (mVerbose) {

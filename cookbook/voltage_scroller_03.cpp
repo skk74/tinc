@@ -134,7 +134,7 @@ struct MyApp : public App {
     // set local filename here relative to running directory and output
     // directory
     processor.setCommand("python");
-    processor.setScriptName("../plot_voltage.py");
+    processor.setScriptName("../../plot_voltage.py");
     processor.setOutputFileNames({"voltage_curve.png"});
     // need to assign processor.registerDoneCallback to load image
     //(should be able to use running/output directory to find file)

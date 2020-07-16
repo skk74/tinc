@@ -184,7 +184,7 @@ public:
 
 protected:
   std::string mRunningDirectory;
-  std::string mOutputDirectory{"cached_output/"};
+  std::string mOutputDirectory;
   std::string mInputDirectory;
   std::vector<std::string> mOutputFileNames;
   std::vector<std::string> mInputFileNames;
