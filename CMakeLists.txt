@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 
 project(TINC)
 
+option(TINC_BUILD_EXAMPLES "Build TINC Examples" OFF)
+
 set(TINC_SRC
 
     ${CMAKE_CURRENT_LIST_DIR}/src/AtomRenderer.cpp
@@ -82,4 +84,8 @@ endif(NETCDF_LIBRARY AND HDF5_FOUND)
 include(buildDependencies.cmake)
 
 ##### Examples
+if(TINC_BUILD_EXAMPLES)
+  message("Building TINC Examples")
 add_subdirectory(examples)
+add_subdirectory(cookbook)
+endif(TINC_BUILD_EXAMPLES)

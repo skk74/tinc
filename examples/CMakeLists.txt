@@ -4,4 +4,4 @@ project(TINCExamples)
 
 include(../cmake/BuildExamples.cmake)
 
-BuildExamples(${CMAKE_CURRENT_SOURCE_DIR} "tinc" tinc)
+BuildExamples("${CMAKE_CURRENT_SOURCE_DIR}" "tinc_examples" tinc)
