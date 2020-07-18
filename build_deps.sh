@@ -16,7 +16,7 @@ make install
 popd
 
 
-git clone --depth 1 --branch v4.3.1 https://github.com/Unidata/netcdf-cxx4.git
-cmake -S netcdf-cxx4 -B netcdf-cxx4_build -DCMAKE_PREFIX_PATH=`pwd`/usr -DBUILD_TESTING:BOOL=OFF -DHDF5_BUILD_EXAMPLES:BOOL=OFF -DHDF5_BUILD_HL_LIB:BOOL=ON -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_USE_EXTERNAL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=OFF -DBUILD_SHARED_LIBS:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=OFF
-cmake --build netcdf-cxx4_build -- -j7
-cmake --install netcdf-cxx4_build --prefix ./usr
+#git clone --depth 1 --branch v4.3.1 https://github.com/Unidata/netcdf-cxx4.git
+#cmake -S netcdf-cxx4 -B netcdf-cxx4_build -DCMAKE_PREFIX_PATH=`pwd`/usr -DBUILD_TESTING:BOOL=OFF -DHDF5_BUILD_EXAMPLES:BOOL=OFF -DHDF5_BUILD_HL_LIB:BOOL=ON -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_USE_EXTERNAL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=OFF -DBUILD_SHARED_LIBS:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=OFF
+#cmake --build netcdf-cxx4_build -- -j7
+#cmake --install netcdf-cxx4_build --prefix ./usr
