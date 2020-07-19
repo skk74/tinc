@@ -6,6 +6,12 @@
 #include <netcdf.h>
 #endif
 
+#if defined(AL_OSX) || defined(AL_LINUX) || defined(AL_EMSCRIPTEN)
+#include <unistd.h>
+#else
+
+#endif
+
 #include <iostream>
 
 using namespace tinc;
@@ -175,6 +181,7 @@ void ParameterSpace::sweep(Processor &processor,
       processor.setRunningDirectory(path);
     }
     if (!processor.process(recompute) && !processor.ignoreFail) {
+      std::cerr << "Processor failed in parameter sweep. Aborting" << std::endl;
       return;
     }
     sweepCount++;
@@ -189,11 +196,22 @@ void ParameterSpace::sweep(Processor &processor,
 void ParameterSpace::sweepAsync(Processor &processor,
                                 std::vector<std::string> dimensions,
                                 bool recompute) {
-
-  mAsyncProcessingThread = std::make_unique<std::thread>([=, &processor]() {
-    //
+#if defined(AL_OSX) || defined(AL_LINUX) || defined(AL_EMSCRIPTEN)
+  pid_t pid;
+  pid = fork();
+  if (pid == -1)
+    std::cerr << "Fork failed. Could not sweep parameter space" << std::endl;
+  if (pid > 0) {
+    // Nothing to do for parent. We don't want to wait for sweep;
+  } else { // Child process
     this->sweep(processor, dimensions, recompute);
-  });
+    exit(0); // Die immediately
+  }
+#else
+
+  mAsyncProcessingThread = std::make_unique<std::thread>(
+      [=, &processor]() { this->sweep(processor, dimensions, recompute); });
+#endif
 }
 
 bool ParameterSpace::createDataDirectories() {
