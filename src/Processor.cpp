@@ -27,7 +27,7 @@ std::mutex PushDirectory::mDirectoryLock;
 PushDirectory::PushDirectory(std::string directory, bool verbose)
     : mVerbose(verbose) {
   mDirectoryLock.lock();
-  getcwd(previousDirectory, 512);
+  getcwd(previousDirectory, sizeof(previousDirectory));
   chdir(directory.c_str());
   if (mVerbose) {
     std::cout << "Pushing directory: " << directory << std::endl;

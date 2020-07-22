@@ -756,38 +756,36 @@ void ParameterSpace::updateParameterSpace(float oldValue,
       indeces[dimension->getName()] = dimension->getCurrentIndex();
       if (dimension.get() == ps) {
         isFileSystemParam = true;
-        indeces[dimension->getName()] =
-            dimension->getIndexForValue(ps->getCurrentValue());
+        indeces[dimension->getName()] = dimension->getIndexForValue(oldValue);
       }
     }
   }
 
   if (isFileSystemParam) {
-    std::string newPath = generateRelativeRunPath(indeces);
-    std::stringstream ss(newPath);
+    std::string oldPath = generateRelativeRunPath(indeces);
+    std::stringstream ss(oldPath);
     std::string item;
-    std::vector<std::string> newPathComponents;
-    while (std::getline(ss, item, AL_FILE_DELIMITER)) {
-      newPathComponents.push_back(std::move(item));
-    }
-
-    auto path = currentRunPath();
-    std::stringstream ss2(path);
     std::vector<std::string> oldPathComponents;
-    while (std::getline(ss2, item, AL_FILE_DELIMITER)) {
+    while (std::getline(ss, item, AL_FILE_DELIMITER)) {
       oldPathComponents.push_back(std::move(item));
     }
 
-    auto oldIt = oldPathComponents.begin();
+    auto newPath = currentRunPath();
+    std::stringstream ss2(newPath);
+    std::vector<std::string> newPathComponents;
+    while (std::getline(ss2, item, AL_FILE_DELIMITER)) {
+      newPathComponents.push_back(std::move(item));
+    }
+
     auto newIt = newPathComponents.begin();
+    auto oldIt = oldPathComponents.begin();
 
     std::string oldSubPath;
     std::string subPath;
     bool needsRefresh = false;
 
-    std::vector<std::shared_ptr<ParameterSpaceDimension>> newDimensions;
-    while (oldIt != oldPathComponents.end() &&
-           newIt != newPathComponents.end()) {
+    while (oldIt != newPathComponents.end() &&
+           newIt != oldPathComponents.end()) {
       if (*oldIt != *newIt) {
         subPath += *newIt + AL_FILE_DELIMITER_STR;
         oldSubPath += *oldIt + AL_FILE_DELIMITER_STR;
@@ -818,8 +816,8 @@ void ParameterSpace::updateParameterSpace(float oldValue,
       // FIXME remove dimensions in ParameterSpace that are no longer used
 
       subPath.clear();
-      newIt = newPathComponents.begin();
-      while (newIt != newPathComponents.end()) {
+      newIt = oldPathComponents.begin();
+      while (newIt != oldPathComponents.end()) {
         subPath += *newIt + AL_FILE_DELIMITER_STR;
         if (mSpecialDirs.find(subPath) != mSpecialDirs.end() &&
             al::File::exists(al::File::conformPathToOS(rootPath) + subPath +

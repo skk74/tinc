@@ -16,7 +16,7 @@ public:
   ~PushDirectory();
 
 private:
-  char previousDirectory[512];
+  char previousDirectory[4096];
   bool mVerbose;
 
   static std::mutex mDirectoryLock; // Protects all instances of PushDirectory

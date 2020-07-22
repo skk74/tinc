@@ -295,7 +295,7 @@ bool ScriptProcessor::runCommand(const std::string &command) {
   PushDirectory p(mRunningDirectory, mVerbose);
 
   if (mVerbose) {
-    std::cout << "DataScript command: " << command << std::endl;
+    std::cout << "ScriptProcessor command: " << command << std::endl;
   }
   std::array<char, 128> buffer{0};
   std::string output;
@@ -392,7 +392,7 @@ al_sec ScriptProcessor::modified(const char *path) const {
 
 bool ScriptProcessor::needsRecompute() {
   std::ifstream metaFileStream;
-  metaFileStream.open(mRunningDirectory + metaFilename(), std::ofstream::in);
+  metaFileStream.open(metaFilename(), std::ofstream::in);
 
   if (metaFileStream.fail()) {
     if (mVerbose) {
